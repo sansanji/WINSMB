@@ -131,12 +131,12 @@ class HCheckbox extends React.Component {
  */
 const styles = StyleSheet.create({
   container: {
-    width: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
+    //width: 50,
+    //flexDirection: 'row',
+    //alignItems: 'center',
   },
   containerStyle: {
-    marginTop: 0,
+    marginTop: -5,
     marginLeft: 5,
     marginRight: 5,
   },
