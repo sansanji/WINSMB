@@ -139,7 +139,7 @@ class HCombobox extends React.Component {
  */
 const styles = StyleSheet.create({
   containerStyle: {
-    marginTop: 0,
+    marginTop: -5,
     marginLeft: 5,
     marginRight: 5,
   },
