@@ -150,6 +150,7 @@ const ScrollableTabView = createReactClass({
         if (this.props.scrollWithoutAnimation) {
           this.scrollView.setPageWithoutAnimation(pageNumber);
         } else {
+          debugger;
           this.scrollView.setPage(pageNumber);
         }
       }
