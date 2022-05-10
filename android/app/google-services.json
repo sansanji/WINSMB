@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "893892821763",
+    "firebase_url": "https://g1mb-74972.firebaseio.com",
+    "project_id": "g1mb-74972",
+    "storage_bucket": "g1mb-74972.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893892821763:android:1583ac0e7c4c53dc",
+        "android_client_info": {
+          "package_name": "com.hanarotns.g1mb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "893892821763-oct18blc40iv5gmfnsska36rnchpu4p9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDa4LNDMgHoGqMFn42wKMVLXArvPX5J7-g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

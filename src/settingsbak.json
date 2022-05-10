@@ -1,0 +1,39 @@
+//Code > 기본설정 > 설정 > 텍스트편지기위에 setting.json
+{
+  "workbench.colorTheme": "Atom One Dark",
+  "editor.renderWhitespace": "all",
+  "workbench.activityBar.visible": true,
+  "window.zoomLevel": 0,
+  "editor.multiCursorModifier": "alt",
+  "typescript.check.npmIsInstalled": false,
+  "extensions.ignoreRecommendations": true,
+  "editor.minimap.enabled": false,
+  // Support using flow through your node_modules folder, WARNING: Checking this box is a security risk. When you open a project we will immediately run code contained within it.
+  "flow.useNPMPackagedFlow": true,
+  // Enable/disable JavaScript validation. (For Flow)
+  "javascript.validate.enable": false,
+  // Enable/disable default JavaScript formatter (For Prettier)
+  "javascript.format.enable": false,
+  "window.openFilesInNewWindow": "off",
+  "javascript.suggest.autoImports": false,
+  "workbench.startupEditor": "newUntitledFile",
+  //vue옵션 시작
+  "editor.formatOnType": true,
+  "eslint.autoFixOnSave": true,
+  "eslint.alwaysShowStatus": true,
+  "eslint.validate": [
+      {
+          "language": "vue",
+          "autoFix": true
+      },
+      {
+          "language": "javascript",
+          "autoFix": true
+      },
+      {
+          "language": "javascriptreact",
+          "autoFix": true
+      }
+  ],
+  "extensions.autoUpdate": false,
+}
