@@ -30,41 +30,24 @@ const app = async paramMenu => {
       paramMenu[0].screen === 'screen.ADM010106' ||
       paramMenu[0].screen === 'com.layout.ComMenu'
     ) {
-      // winButton = [
-      //   {
-      //     id: 'winsButton',
-      //     component: {
-      //       name: 'com.layout.WinsButton',
-      //     },
-      //   },
-      //   {
-      //     id: 'chatButton',
-      //     component: {
-      //       name: 'com.layout.ChattingButton',
-      //     },
-      //   },
-      //   {
-      //     id: 'notifiButton',
-      //     component: {
-      //       name: 'com.layout.NotificationButton',
-      //     },
-      //   },
-      // ];
       winButton = [
         {
-          id: 'notifiButton',
-          icon: icons.notifications,
-          color: bluecolor.basicWhiteColor,
-        },
-        {
           id: 'winsButton',
-          icon: icons.explore,
-          color: bluecolor.basicWhiteColor,
+          component: {
+            name: 'com.layout.WinsButton',
+          },
         },
         {
           id: 'chatButton',
-          icon: icons.profile,
-          color: bluecolor.basicWhiteColor,
+          component: {
+            name: 'com.layout.ChattingButton',
+          },
+        },
+        {
+          id: 'notifiButton',
+          component: {
+            name: 'com.layout.NotificationButton',
+          },
         },
       ];
     }
@@ -102,7 +85,7 @@ const app = async paramMenu => {
               // },
             },
     });
-    Navigation.setRoot({
+    await Navigation.setRoot({
       root: {
         sideMenu: {
           left: {
@@ -141,6 +124,7 @@ const app = async paramMenu => {
                                 fontSize: 14,
                                 color: bluecolor.basicWhiteColor,
                               },
+                              rightButtons: winButton,
                               leftButtons: [
                                 {
                                   id: 'menuButton',
@@ -148,7 +132,6 @@ const app = async paramMenu => {
                                   color: bluecolor.basicWhiteColor,
                                 },
                               ],
-                              rightButtons: winButton,
                             },
                       background: {
                         component: {

@@ -41,7 +41,7 @@
     "react-native-loading-spinner-overlay": "^2.0.0",
     "react-native-maps": "^0.29.3",
     "react-native-maps-directions": "^1.8.0",
-    "react-native-navigation": "^7.20.0",
+    "react-native-navigation": "^7.27.1",
     "react-native-pinch": "github:sansanji/react-native-pinch",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-signature-capture": "^0.4.12",

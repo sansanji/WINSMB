@@ -12,15 +12,16 @@ import {
   Alert,
   PermissionsAndroid,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
-import { _, React, Redux, Fetch, NavigationScreen, bluecolor } from 'libs';
-import { Touchable } from 'ux';
+import {_, React, Redux, Fetch, NavigationScreen, bluecolor, Util} from 'libs';
+import {Touchable, HText} from 'ux';
 /* *
  * Import node_modules
  * */
-import { CheckBox } from 'react-native-elements';
+import {CheckBox} from 'react-native-elements';
 import loginCheck from 'src/loginCheck';
-import { Icon } from 'react-native-elements';
+import {Icon} from 'react-native-elements';
 /**
  * 로그인 화면
  */
@@ -40,8 +41,14 @@ class Component extends NavigationScreen {
       saveID: true,
       savePW: true,
       saveWINS: null,
+      saveCOUNTRY: true,
+      countryName: null,
+      countryCode: null,
       alertT: 'Remember ID',
       alertT2: 'Remember PW',
+      saveTerms: null,
+      saveUseTerm: null,
+      savePersonalTerm: null,
     };
     this.isPhoneNo = true;
     AsyncStorage.getItem('', (err, result) => {
@@ -77,6 +84,8 @@ class Component extends NavigationScreen {
       saveID: nextCheckID,
       savePW: nextCheckPW,
       saveWINS: nextCheckWINS,
+      saveCOUNTRY: nextCheckCOUNTRY,
+      countryName: nextCountryName,
     } = nextState;
 
     const {
@@ -85,6 +94,8 @@ class Component extends NavigationScreen {
       saveID: currCheckID,
       savePW: currCheckPW,
       saveWINS: currCheckWINS,
+      saveCOUNTRY: currCheckCOUNTRY,
+      countryName: currCountryName,
     } = this.state;
 
     return (
@@ -92,7 +103,9 @@ class Component extends NavigationScreen {
       currPassword !== nextPassword ||
       currCheckID !== nextCheckID ||
       currCheckPW !== nextCheckPW ||
-      currCheckWINS !== nextCheckWINS
+      currCheckWINS !== nextCheckWINS ||
+      currCheckCOUNTRY !== nextCheckCOUNTRY ||
+      currCountryName !== nextCountryName
     );
   }
   checkPermission() {
@@ -118,7 +131,10 @@ class Component extends NavigationScreen {
         Alert.alert(
           'Please, Check Permissions!',
           message,
-          [{ text: 'OK', onPress: () => this.checkPermission() }, { cancelable: false }],
+          [
+            {text: 'OK', onPress: () => this.checkPermission()},
+            {cancelable: false},
+          ],
           {
             cancelable: false,
           },
@@ -134,11 +150,18 @@ class Component extends NavigationScreen {
         this.setState({
           id: result,
           saveID: true,
+          saveTerms: 'Y',
+          saveUseTerm: 'Y',
+          savePersonalTerm: 'Y',
         });
+        AsyncStorage.setItem('Terms', 'Y');
       } else {
         this.setState({
           id: null,
           saveID: true,
+          saveTerms: 'N',
+          saveUseTerm: 'N',
+          savePersonalTerm: 'N',
         });
       }
     });
@@ -166,6 +189,43 @@ class Component extends NavigationScreen {
         });
       }
     });
+    await AsyncStorage.getItem('countryName', (err, result) => {
+      if (result) {
+        this.setState({
+          countryName: result,
+        });
+      } else {
+        this.setState({
+          countryName: 'Korea',
+        });
+      }
+    });
+    await AsyncStorage.getItem('countryCode', (err, result) => {
+      if (result) {
+        this.setState({
+          countryCode: result,
+        });
+      } else {
+        this.setState({
+          countryCode: 'KO',
+        });
+      }
+    });
+    await AsyncStorage.getItem('Terms', (err, result) => {
+      if (result) {
+        this.setState({
+          saveTerms: 'Y',
+          saveUseTerm: 'Y',
+          savePersonalTerm: 'Y',
+        });
+      } else {
+        this.setState({
+          saveTerms: 'N',
+          saveUseTerm: 'N',
+          savePersonalTerm: 'N',
+        });
+      }
+    });
   }
 
   async logOut() {
@@ -183,7 +243,36 @@ class Component extends NavigationScreen {
   }
 
   async login() {
+    const savetermsYN = this.state.saveTerms;
+    // const saveUserTerm = this.state.saveUseTerm;
+    // const savePersonalTerm = this.state.savePersonalTerm;
+
+    if (savetermsYN === 'N') {
+      Util.TosBox(this.state.saveUseTerm, this.state.savePersonalTerm);
+      this.setState({
+        saveTerms: 'Y',
+        saveUseTerm: 'Y',
+        savePersonalTerm: 'Y',
+      });
+      AsyncStorage.setItem('Terms', 'Y');
+      return;
+    }
+
     // console.log('login button pressed');
+    if (Util.isEmpty(this.state.countryCode)) {
+      await AsyncStorage.removeItem('countryName');
+      await AsyncStorage.removeItem('countryCode');
+      Util.toastMsg('Please Check Country');
+      return;
+    }
+    // fetch부분은 Token 호출하기 전에 save 해줌 WINS country별접속  저장여부
+    if (this.state.saveCOUNTRY) {
+      await AsyncStorage.setItem('countryName', this.state.countryName);
+      await AsyncStorage.setItem('countryCode', this.state.countryCode);
+    } else {
+      await AsyncStorage.removeItem('countryName');
+      await AsyncStorage.removeItem('countryCode');
+    }
     const tokenp = await this.fetchToken();
     // if (!token) {
     //   return;
@@ -196,7 +285,11 @@ class Component extends NavigationScreen {
     const csrf = _.get(tokenp, 'signaldata.X-CSRF-TOKEN');
     // const csrf = _.get(tokenp, 'Set-Cookie');
     console.log(csrf);
-    const result = await this.fetchLogin(csrf, this.state.id, this.state.password);
+    const result = await this.fetchLogin(
+      csrf,
+      this.state.id,
+      this.state.password,
+    );
     const message = _.get(result, 'MSG');
     // const status = _.get(result, 'STATUS');
     const type = _.get(result, 'TYPE');
@@ -243,11 +336,30 @@ class Component extends NavigationScreen {
   }
 
   async loginRetry() {
+    if (Util.isEmpty(this.state.countryCode)) {
+      await AsyncStorage.removeItem('countryName');
+      await AsyncStorage.removeItem('countryCode');
+      Util.toastMsg('Please Check Country');
+      return;
+    }
+    // fetch부분은 Token 호출하기 전에 save 해줌 WINS country별접속  저장여부
+    if (this.state.saveCOUNTRY) {
+      await AsyncStorage.setItem('countryName', this.state.countryName);
+      await AsyncStorage.setItem('countryCode', this.state.countryCode);
+    } else {
+      await AsyncStorage.removeItem('countryName');
+      await AsyncStorage.removeItem('countryCode');
+    }
+
     const tokenp = await this.fetchToken();
 
     const csrf = _.get(tokenp, 'signaldata.X-CSRF-TOKEN');
     console.log(csrf);
-    const result = await this.fetchLogin(csrf, this.state.id, this.state.password);
+    const result = await this.fetchLogin(
+      csrf,
+      this.state.id,
+      this.state.password,
+    );
     const message = _.get(result, 'MSG');
 
     const type = _.get(result, 'TYPE');
@@ -257,9 +369,14 @@ class Component extends NavigationScreen {
         this.initLogin = false;
       } else {
         this.initLogin = true;
-        Alert.alert('Please, Try it again!', message, [{ text: 'OK' }, { cancelable: false }], {
-          cancelable: false,
-        });
+        Alert.alert(
+          'Please, Try it again!',
+          message,
+          [{text: 'OK'}, {cancelable: false}],
+          {
+            cancelable: false,
+          },
+        );
       }
     } else {
       loginCheck('ok');
@@ -284,6 +401,32 @@ class Component extends NavigationScreen {
     }
   }
 
+  getCountry() {
+    Util.openComboBox({
+      label: 'Country',
+      groupCode: null,
+      groupJson: [
+        {DT_CODE: 'KO', LOC_VALUE: 'Korea'},
+        {DT_CODE: 'EU', LOC_VALUE: 'Europe'},
+        {DT_CODE: 'CN', LOC_VALUE: 'China'},
+      ],
+      sql: null,
+      codeField: 'DT_CODE', // 기본적으로 DT_CODE
+      nameField: 'LOC_VALUE', // 기본적으로 LOC_VALUE
+      selected: null,
+      onChange: (value, comboValues) => {
+        this.setState({
+          countryName: value.name,
+          countryCode: value.code,
+        });
+        // 값이 변할때 이벤트 발생
+        if (this.props.onChanged) {
+          this.props.onChanged(value, comboValues);
+        }
+      },
+    });
+  }
+
   render() {
     return (
       <View
@@ -292,37 +435,50 @@ class Component extends NavigationScreen {
           flexDirection: 'column',
           justifyContent: 'space-between',
           backgroundColor: bluecolor.basicWhiteColor,
-        }}
-      >
-      <Image
-      source={backImage}
-      style={{
-        flex: 1,
-        position: 'absolute',
-        resizeMode: 'cover',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%',
-        backgroundColor: bluecolor.basicTrans,
-      }}
-    />
+        }}>
+        <Image
+          source={backImage}
+          style={{
+            flex: 1,
+            position: 'absolute',
+            resizeMode: 'cover',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+            backgroundColor: bluecolor.basicTrans,
+          }}
+        />
         <KeyboardAvoidingView style={styles.container} behavior="height">
-          <View style={{ height: 350, width: '70%' }}>
+          <View style={{height: 260, width: '70%'}}>
             <Image
               source={tnsLogoImage}
               resizeMode={'contain'}
-              style={{ marginBottom: 0, width: '100%' }}
+              style={{marginBottom: 0, width: '100%'}}
             />
           </View>
+          <TouchableOpacity
+            style={{
+              height: 80,
+              width: '70%',
+              // marginBottom: 15,
+              // alignItems: 'flex-end',
+              alignItems: 'center',
+            }}
+            onPress={() => this.getCountry()}>
+            <HText
+              value={`${this.state.countryName}  ▼`}
+              textStyle={styles.textWithShadow}
+            />
+          </TouchableOpacity>
           <View style={styles.inputIdContainer}>
             <TextInput
               style={styles.inputId}
-              onChangeText={text => this.setState({ id: text })}
+              onChangeText={text => this.setState({id: text})}
               keyboardType="email-address"
               placeholder="ID"
               underlineColorAndroid={'transparent'}
@@ -333,7 +489,7 @@ class Component extends NavigationScreen {
             <TextInput
               style={styles.inputId}
               secureTextEntry
-              onChangeText={text => this.setState({ password: text })}
+              onChangeText={text => this.setState({password: text})}
               underlineColorAndroid={'transparent'}
               placeholder="Password"
               autoCapitalize={'none'}
@@ -353,7 +509,7 @@ class Component extends NavigationScreen {
               checkedColor={bluecolor.basicBlueColor}
               // uncheckedColor="#003366"
               containerStyle={{
-                height: 60,
+                height: 35,
                 backgroundColor: bluecolor.basicTrans,
                 borderColor: 'transparent',
               }}
@@ -366,7 +522,9 @@ class Component extends NavigationScreen {
               size={15}
               checked={this.state.saveWINS === 'Y'}
               onPress={() => {
-                this.setState({ saveWINS: this.state.saveWINS === 'Y' ? 'N' : 'Y' });
+                this.setState({
+                  saveWINS: this.state.saveWINS === 'Y' ? 'N' : 'Y',
+                });
               }}
             />
           </View>
@@ -376,13 +534,29 @@ class Component extends NavigationScreen {
             alignItems: 'center',
             justifyContent: 'flex-end',
             margin: 5,
-          }}
-        >
+          }}>
+          <Touchable
+            activeOpacity={0.5}
+            onPress={() => {
+              Util.TosBox(this.state.saveUseTerm, this.state.savePersonalTerm);
+              this.setState({
+                saveTerms: 'Y',
+                saveUseTerm: 'Y',
+                savePersonalTerm: 'Y',
+              });
+              AsyncStorage.setItem('Terms', 'Y');
+            }}>
+            <Text
+              style={{
+                fontSize: 10,
+              }}>
+              {'이용약관/개인정보 수집 동의'}
+            </Text>
+          </Touchable>
           <Text
             style={{
               fontSize: 10,
-            }}
-          >
+            }}>
             Copyright © Hanaro TNS All rights reserved.
           </Text>
         </View>
@@ -395,6 +569,14 @@ class Component extends NavigationScreen {
  * Define component styles
  */
 const styles = StyleSheet.create({
+  textWithShadow: {
+    color: 'rgba(255,255,230,0.9)',
+    textShadowColor: bluecolor.basicBlueFontColor,
+    // textShadowOffset: { width: 1, height: 0 },
+    // textShadowRadius: 10,
+    fontSize: 12,
+    fontWeight: '400',
+  },
   container: {
     flex: 1,
     // backgroundColor: bluecolor.basicGrayColorTrans,
@@ -426,7 +608,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
     // backgroundColor: bluecolor.basicGrayColorTrans,
-    backgroundColor : '#3e7ce7',
+    backgroundColor: '#3e7ce7',
     color: bluecolor.basicWhiteColor,
     paddingLeft: 10,
     fontSize: 15,
@@ -481,6 +663,6 @@ const styles = StyleSheet.create({
 /**
  * Inject redux actions and props
  */
-const mapStateToProps = state => ({ global: state.global, phone: state.phone });
+const mapStateToProps = state => ({global: state.global, phone: state.phone});
 
 export default Redux.connect(mapStateToProps)(Component);

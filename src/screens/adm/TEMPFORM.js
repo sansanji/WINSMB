@@ -146,6 +146,10 @@ class Component extends NavigationScreen {
     Util.barcodeBox(value);
   }
 
+  onTosBoxPopup() {
+    Util.TosBox();
+  }
+
   onImageBoxPopup() {
     const title = this.screenId; // 팝업 타이트 설정 값
     const source = `${fetchURL}/api/file/getDownload/HTNS/MB/1602813685293`;
@@ -661,6 +665,8 @@ class Component extends NavigationScreen {
         <HTexttitle>webView</HTexttitle>
         <HButton onPress={() => this.openWebViewLogin()} name={'monitor'} title={'Webivew Login'} />
         <HButton onPress={() => this.openWebView()} name={'monitor'} title={'Webivew'} />
+        <HTexttitle>TosBox</HTexttitle>
+        <HButton onPress={() => this.onTosBoxPopup()} name={'paint-brush'} title={'Tos Box'} />
         <HTexttitle>Timeline</HTexttitle>
         <Timeline
           data={[

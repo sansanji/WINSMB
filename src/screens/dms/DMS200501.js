@@ -247,7 +247,7 @@ renderBody = (item, index) => (
     <HFormView style={{ marginTop: 2 }}>
       <HRow between>
         <HText
-          value={item.GR_NO}
+          value={`${item.GR_NO} (${item.ITEM_CODE})`}
           textStyle={{
             color: bluecolor.basicBlueImpactColor,
             fontWeight: 'bold',
@@ -271,7 +271,7 @@ renderBody = (item, index) => (
             />
           ) : (
             <HText
-              value={`${item.GR_STATUS_NAME} ${item.GR_STATUS !== 'F' && item.SCAN_QTY === 0 ? '' : '/ 임시저장'}`}
+              value={`${item.GR_STATUS_NAME}`}
               textStyle={[
                 item.GR_STATUS === 'F'
                   ? {

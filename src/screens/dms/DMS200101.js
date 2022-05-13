@@ -1,7 +1,7 @@
 /* *
 * Import Common
 * */
-import { View, StyleSheet, TextInput } from 'react-native';
+import { View, StyleSheet, TextInput, Text } from 'react-native';
 import {
   _,
   React,
@@ -247,7 +247,7 @@ renderBody = (item, index) => (
     <HFormView style={{ marginTop: 2 }}>
       <HRow between>
         <HText
-          value={item.GI_NO}
+          value={`${item.GI_NO} (${item.ITEM_CODE})`}
           textStyle={{
             color: bluecolor.basicBlueImpactColor,
             fontWeight: 'bold',
@@ -294,6 +294,10 @@ renderBody = (item, index) => (
         <HTextfield label={'Ref No'} value={item.REF_NO} />
         <HTextfield label={'Doc No'} value={item.REF_DOC_NO} />
         <HNumberfield label={'DT Cont'} value={item.GI_DT_COUNT} />
+        <View style={{ margin: 0, padding: 0, width: 100 }}>
+          <Text style={{ fontSize: 9, fontWeight: 'bold' }}> {'메모'}</Text>
+          <Text style={{ margin: 0, padding: 0, fontSize: 11, color: bluecolor.basicBlueFontColor }} > {item.INSPECTION_REMARKS}</Text>
+        </View>
       </HRow>
     </HFormView>
   </Touchable>

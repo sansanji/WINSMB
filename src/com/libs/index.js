@@ -16,9 +16,18 @@ import Futch from 'libs/futch';
 import ReduxStore from 'libs/store';
 import Upload from 'libs/upload';
 import Util from 'libs/util';
-import { initSettings, initCommonCode, initConfigure, initLocation, initSettingsWins } from 'libs/init';
+import {
+  initSettings,
+  initCommonCode,
+  initConfigure,
+  initLocation,
+  initSettingsWins,
+} from 'libs/init';
 import NavigationScreen from 'layout/NavigationScreen';
-import { initPushNotification, connectPushNotificationListeners } from 'libs/pushNotification';
+import {
+  initPushNotification,
+  connectPushNotificationListeners,
+} from 'libs/pushNotification';
 import Spinner from 'common/Spinner';
 import bluecolor from 'styles/theme-color-blue';
 import env from 'libs/env';
@@ -28,6 +37,7 @@ import langUtil from 'libs/langUtil';
 import beaconUtil from 'libs/beaconUtil';
 import usbUtil from 'libs/usbUtil';
 import KeepAwake from 'react-native-keep-awake';
+import termContents from './termContents';
 
 export {
   _,
@@ -61,4 +71,5 @@ export {
   beaconUtil,
   usbUtil,
   KeepAwake,
+  termContents,
 };

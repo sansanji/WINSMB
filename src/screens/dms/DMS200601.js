@@ -67,7 +67,7 @@ class Component extends NavigationScreen {
       TIME_MIN_NAME: '00',
       BT_TIME_HOUR_NAME: '00',
       BT_TIME_MIN_NAME: '00',
-      TAP_CODE: 'PLT',
+      TAP_CODE: 'BOX',
 
       VENDOR_CODE: this.props.global.dmsVendorcode.VENDOR_CODE,
       BUYER_CODE: this.props.global.dmsVendorcode.BUYER_CODE,
@@ -115,7 +115,7 @@ class Component extends NavigationScreen {
     const modelValue = modelUtil.getModelData('DMS200301');
 
     this.setState({
-      TAP_CODE: 'PLT',
+      TAP_CODE: 'BOX',
       GI_DATE: modelValue.GI_DATE,
       BT_GR_DATE: modelValue.BT_GR_DATE,
     });
@@ -151,7 +151,7 @@ class Component extends NavigationScreen {
       body: JSON.stringify({
         // DMS030310F2: this.state,
         DMS030310F2: modelUtil.getModelData('DMS200301'),
-        DMS030310G4: {
+        DMS030310G5: {
           data: this.state.data,
         },
       }),
@@ -218,7 +218,7 @@ class Component extends NavigationScreen {
     const modelValue = modelUtil.getModelData('DMS200301');
 
     this.setState({
-      TAP_CODE: 'PLT',
+      TAP_CODE: 'BOX',
       GI_DATE: modelValue.GI_DATE,
       BT_GR_DATE: modelValue.BT_GR_DATE,
     });
@@ -229,9 +229,15 @@ class Component extends NavigationScreen {
     //    GR_DATE: '20210624', // this.props.model.data.DMS200301.GR_DATE,
     //  }));
     const dataLength = this.state.data.length;
-    const barcode1Data = this.barcode1._lastNativeText;
+    let barcode1Data = null;
     let g1ScanData = null;
     let targetG1ScanData = null;
+
+    barcode1Data = this.barcode1._lastNativeText;
+    if (scanData) {
+      barcode1Data = scanData;
+    }
+
     modelUtil.setValue('DMS200301.barcodeData1', barcode1Data);
 
     for (let i = 0; i < dataLength; i += 1) {
@@ -251,20 +257,20 @@ class Component extends NavigationScreen {
       }
     }
 
-    this.setState({
-      scanVaildData: `"${barcode1Data}" already scanned!`,
-    });
+    // this.setState({
+    //   scanVaildData: `"${barcode1Data}" already scanned!`,
+    // });
     this._setScanValidData('a');
     this._sound('s');
 
-    const result1 = await Fetch.request('DMS030320SVC', 'getStockCheck', {
+    const result1 = await Fetch.request('DMS030320SVC', 'getStockCheckBOX', {
 
       body: JSON.stringify({
         DMS030320F1: modelUtil.getModelData('DMS200301'),
       }),
     });
 
-    if (result1) {
+    if (result1.TYPE === 1) {
       // 정해진 데이터만 보여준다.
       if (result1.DMS030320G2[0]) {
         let totalData = '';
@@ -279,8 +285,8 @@ class Component extends NavigationScreen {
               MSG: result1.MSG,
             },
             barcodeData1: null,
+            scanData,
           },
-          scanData,
         );
         Util.openLoader(this.screenId, false);
       } else {
@@ -837,7 +843,7 @@ class Component extends NavigationScreen {
               />
             </View>
           </HRow>
-          <HTexttitle>GI Plt. Info</HTexttitle>
+          <HTexttitle>GI Box. Info</HTexttitle>
         </HFormView>
         <View style={styles.spaceAroundStyle}>
           <TextInput

@@ -3,71 +3,60 @@
  * */
 import { View, Text, TextInput, StyleSheet, Keyboard, Vibration } from 'react-native';
 import { _, React, Util, Redux, Fetch, Navigation, NavigationScreen, ReduxStore, modelUtil } from 'libs';
-import { HBaseView, Touchable, HButton, HIcon, HCheckbox } from 'ux';
+import { HBaseView, Touchable, HButton, HIcon } from 'ux';
 
 /**
- * 출고검수 list화면
+ * IOT 바코드 스캔  화면
  */
 
 class Component extends NavigationScreen {
   constructor(props) {
-    super(props, 'DMS200201');
+    super(props, 'DMS200801');
     this.state = {
       data: [],
       spinner: false,
-      DATE_FROM: null,
-      DATE_TO: null,
-      GRGI_FLAG: 'GI',
       keyword: null,
       scanVaildData: 'Ready',
     };
   }
 
   componentWillMount() {
-    modelUtil.setModelData('DMS200201', {
-      GR_DT: 'N',
-      PLT_CHECK: 'N',
-      BOX_CHECK: 'Y',
-      ITEM_CHECK: 'N',
-    });
-    this._validCheckFunc('alert'); // 모든 화면은 기본적으로 dmsWhcode와 vendor정보가 필요하기 때문에 체크 로직을 태운다.
+    modelUtil.setModelData('DMS200801', {});
+    this._validCheckFunc(); // 모든 화면은 기본적으로 dmsWhcode와 vendor정보가 필요하기 때문에 체크 로직을 태운다.
   }
 
-  shouldComponentUpdate() {
-    return true;
-  }
+  // shouldComponentUpdate() {
+  //   return true;
+  // }
 
   // 창고코드 및 벤더 정보 유무 체크
-  _validCheckFunc(alertType) {
-    const validCheck = Util.dmsValidCheckFunc(alertType);
+  _validCheckFunc() {
+    const whcode = this.props.global.dmsWhcode.WH_CODE;
+    if(Util.isEmpty(whcode)){
+      Util.msgBox({
+        title: 'No warehouse master information selected.' ,
+        msg: 'Please set it in the setting menu.' ,
+        buttonGroup: [
+          {
+            title: 'OK',
+          },
+        ],
+      });
+    }
   }
 
-  _onPress(item, barcode1Data) {
+  _onPress(item) {
     const { navigator } = this.props;
-    const checkData = modelUtil.getModelData('DMS200201');
-    // if (grgiFlag === 'ITBOX') {
-    const PLT_CHECK = checkData.PLT_CHECK;
-    const BOX_CHECK = checkData.BOX_CHECK;
-    const ITEM_CHECK = checkData.ITEM_CHECK;
-    const GR_DT = checkData.GR_DT;
+
     Navigation(
       navigator,
-      'screen.DMS200202',
+      'screen.DMS200802',
       {
-        onSaveComplete: callback => this._clear(`${item.GR_NO} Success!`, callback),
+        onSaveComplete: msg => this._clear(msg),
         params: item,
-        barcode: barcode1Data,
-        PLT_CHECK,
-        BOX_CHECK,
-        ITEM_CHECK,
-        GR_DT,
       },
-      'mapping detail',
+      'Dt List',
     );
-  }
-
-  _onSearch() {
-    this._validCheckFunc('alert');
   }
 
   // 바코드 스캔 처리 로직
@@ -81,40 +70,31 @@ class Component extends NavigationScreen {
     }
 
     const whCode = _.get(this.props.global, 'dmsWhcode.WH_CODE', null);
-    const COMPANY_CODE = this.props.global.session.COMPANY_CODE;
-    const grgiFlag = '';
 
     Vibration.vibrate(500);
     this.barcode1.clear();
 
-    // if (!barcode1Data || barcode1Data.length !== 15) {
-    if (Util.isEmpty(barcode1Data)) {
+    if (!barcode1Data || barcode1Data.length !== 15) {
       this.setState({
-        scanVaildData: 'Please, Input Box/Item No.',
+        scanVaildData: 'Please, Input GR/GI No.',
       });
       this.failScan();
       return;
     }
 
-    if (!(barcode1Data.indexOf('ITPLT') > -1 || barcode1Data.indexOf('ITBOX') > -1) || barcode1Data.indexOf('ITITEM') > -1) {
+    if (!(barcode1Data.indexOf('GR') > -1 || barcode1Data.indexOf('GI') > -1)) {
       this.setState({
-        scanVaildData: 'Please, Input Box/Item No.',
+        scanVaildData: 'Please, Input GR/GI No.',
       });
       this.failScan();
       return;
     }
 
-    const result = await Fetch.request('DMS030050SVC', 'getScan', {
+    const result = await Fetch.request('DMS030310SVC', 'getInfo', {
       body: JSON.stringify({
-        DMS030050F1: {
-          COMPANY_CODE,
-          SCAN_NO: barcode1Data,
+        DMS030310F1: {
           WH_CODE: whCode,
-          GR_FLAG: 'Y',
-          BOX_CHECK: modelUtil.getValue('DMS200201.BOX_CHECK'),
-          ITEM_CHECK: modelUtil.getValue('DMS200201.ITEM_CHECK'),
-          PLT_CHECK: modelUtil.getValue('DMS200201.PLT_CHECK'),
-          GR_DT: modelUtil.getValue('DMS200201.GR_DT'),
+          GRGI_NO: barcode1Data,
         },
       }),
     });
@@ -125,11 +105,14 @@ class Component extends NavigationScreen {
         // 스캔 성공한 경우
         this.setState({
           scanVaildData: 'Find out!',
-          // data: result[resKey][0],
-          data: result.DMS030050G2,
+          data: result.DMS030310G1,
           spinner: false,
         });
-        this._onPress(this.state.data, barcode1Data);
+        ReduxStore.dispatch({
+          type: 'global.dmsVendorcode.set',
+          dmsVendorcode: this.state.data,
+        });
+        this._onPress(result.DMS030310G1);
         this._clear('Ready');
         this.successScan();
       } else {
@@ -190,42 +173,6 @@ class Component extends NavigationScreen {
   render() {
     return (
       <HBaseView style={styles.container} scrollable={false}>
-        <View style={styles.checkContainer}>
-          <View style={{ marginRight: 10 }}>
-            <HCheckbox
-              label={'GR/GI Dt'}
-              bind={'DMS200201.GR_DT'}
-              toggle
-              editable
-              rowflex={1}
-            />
-          </View>
-          <View style={{ marginRight: 10 }}>
-            <HCheckbox
-              label={'PLT'}
-              bind={'DMS200201.PLT_CHECK'}
-              toggle
-              editable
-              rowflex={1}
-            />
-          </View>
-          <View style={{ marginRight: 10 }}>
-            <HCheckbox
-              label={'BOX'}
-              bind={'DMS200201.BOX_CHECK'}
-              toggle
-              editable
-              rowflex={1}
-            />
-          </View>
-          <HCheckbox
-            label={'ITEM'}
-            bind={'DMS200201.ITEM_CHECK'}
-            toggle
-            editable
-            rowflex={1}
-          />
-        </View>
         <View style={styles.searchContainer}>
           <Text
             style={styles.textVaildScan}
@@ -251,7 +198,7 @@ class Component extends NavigationScreen {
             }}
           />
           <View style={styles.spaceAroundStyle}>
-            <HButton onPress={() => this._clear()} name={'refresh'} title={'Refresh'} />
+            <HButton onPress={() => this._clear('Ready')} name={'refresh'} title={'Refresh'} />
           </View>
         </View>
         <Touchable
@@ -285,13 +232,6 @@ const styles = StyleSheet.create({
     paddingRight: 3,
     paddingLeft: 3,
   },
-  buttonText: {
-    fontWeight: 'bold',
-    color: '#428BCA',
-    fontSize: 16,
-    paddingTop: 20,
-    paddingRight: 5,
-  },
   barcodeInput: {
     height: 40,
     flex: 1,
@@ -300,18 +240,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     paddingBottom: 10,
-  },
-  buttonStyle: {
-    width: 25,
-    height: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingLeft: 5,
-    paddingRight: 5,
-    backgroundColor: '#428BCA',
-    borderRadius: 10,
-    marginTop: 10,
-    marginRight: 5,
   },
   textVaildScan: {
     color: '#3333ce',
@@ -353,11 +281,6 @@ const styles = StyleSheet.create({
       height: 1,
       width: 0,
     },
-  },
-  checkContainer: {
-    flexDirection: 'row',
-    marginLeft: 10,
-    marginBottom: 10,
   },
 });
 

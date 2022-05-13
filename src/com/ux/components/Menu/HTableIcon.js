@@ -1,8 +1,8 @@
 /* *
  * Import Common
  * */
-import { StyleSheet, View, Dimensions } from 'react-native';
-import { Util, React, ReduxStore } from 'libs';
+import {StyleSheet, View, Dimensions} from 'react-native';
+import {Util, React, ReduxStore} from 'libs';
 import Touchable from 'common/Touchable';
 import HText from 'components/Form/Text/HText';
 /* *
@@ -25,24 +25,27 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
  */
 class HTableIcon extends React.Component {
   render() {
-    const { iconStyle, activeIcon, tableStyle } = this.props;
-    const { theme } = ReduxStore.getState().global;
+    const {iconStyle, activeIcon, tableStyle} = this.props;
+    const {theme} = ReduxStore.getState().global;
     const screenWidth = Dimensions.get('window').width / 3;
 
     if (!Util.isEmpty(this.props.iconList)) {
       const menuItem = this.props.iconList.map((item, i) => (
-        <View key={i} style={{ width: screenWidth, alignItems: 'center', paddingTop: 10 }}>
+        <View
+          key={i}
+          style={{width: screenWidth, alignItems: 'center', paddingTop: 10}}>
           <Touchable
             activeOpacity={0.5}
             style={[styles.tabButton, iconStyle]}
-            onPress={() => this.props.onClick(item.screen, i, item.title)}
-          >
+            onPress={() => this.props.onClick(item.screen, i, item.title)}>
             <FontAwesome
               name={item.finalIcon}
-              size={26}
+              size={20}
               style={
                 // iconStyle
-                activeIcon === i ? theme.tabIcomColorActive : theme.tabIcomColorDeActive
+                activeIcon === i
+                  ? theme.tabIcomColorActive
+                  : theme.tabIcomColorDeActive
               }
             />
             <HText
@@ -50,10 +53,11 @@ class HTableIcon extends React.Component {
               multiline // ios에서 메뉴명이 길 경우 잘리는 경우가 발생하여 옵션 추가!
               adjustsFontSizeToFit // ios에서 메뉴명이 길 경우 잘리는 경우가 발생하여 옵션 추가!
               textStyle={[
-                activeIcon === i ? theme.tabIcomColorActive : theme.tabIcomColorDeActive,
+                activeIcon === i
+                  ? theme.tabIcomColorActive
+                  : theme.tabIcomColorDeActive,
                 styles.mText,
-              ]}
-            >
+              ]}>
               {item.title}
             </HText>
           </Touchable>

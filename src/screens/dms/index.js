@@ -1,3 +1,4 @@
+/* eslint-disable import/first */
 import { Navigation } from 'react-native-navigation';
 
 import DMS100101 from './DMS100101'; // 바코드
@@ -57,6 +58,21 @@ import DMS200601 from './DMS200601'; //  박스 오더
 
 import DMS200701 from './DMS200701'; // 신버전 위치이동
 
+import DMS200801 from './DMS200801'; // IOT 바코드 스캔
+import DMS200802 from './DMS200802'; // IOT 바코드 디테일 화면
+
+import DMS200901 from './DMS200901'; // 재고리스트 조회화면
+import DMS200902 from './DMS200902'; // 재고 pop up
+
+import DMS201001 from './DMS201001'; // lotte move화면
+import DMS100602 from './DMS100602'; // lotte move화면
+import DMS201101 from './DMS201101'; // lotte move화면
+import DMS201201 from './DMS201201'; // 재고조사
+import DMS201202 from './DMS201202'; // Stock History
+
+import DMS201301 from './DMS201301'; // GI 스캔 화면
+import DMS201302 from './DMS201302'; // GI 스캔 화면
+import DMS201303 from './DMS201303'; // GR 스캔 화면
 
 import React from 'react';
 
@@ -255,6 +271,15 @@ export default (store, Provider) => {
     () => DMS100601,
   );
   Navigation.registerComponent(
+    'screen.DMS100602',
+    () => props => (
+      <Provider store={store}>
+        <DMS100602 {...props} />
+      </Provider>
+    ),
+    () => DMS100602,
+  );
+  Navigation.registerComponent(
     'screen.DMS100701',
     () => props => (
       <Provider store={store}>
@@ -415,5 +440,105 @@ export default (store, Provider) => {
       </Provider>
     ),
     () => DMS200701,
+  );
+  Navigation.registerComponent(
+    'screen.DMS200801',
+    () => props => (
+      <Provider store={store}>
+        <DMS200801 {...props} />
+      </Provider>
+    ),
+    () => DMS200801,
+  );
+  Navigation.registerComponent(
+    'screen.DMS200802',
+    () => props => (
+      <Provider store={store}>
+        <DMS200802 {...props} />
+      </Provider>
+    ),
+    () => DMS200802,
+  );
+  Navigation.registerComponent(
+    'screen.DMS200901',
+    () => props => (
+      <Provider store={store}>
+        <DMS200901 {...props} />
+      </Provider>
+    ),
+    () => DMS200901,
+  );
+  Navigation.registerComponent(
+    'screen.DMS200902',
+    () => props => (
+      <Provider store={store}>
+        <DMS200902 {...props} />
+      </Provider>
+    ),
+    () => DMS200902,
+  );
+  Navigation.registerComponent(
+    'screen.DMS201001',
+    () => props => (
+      <Provider store={store}>
+        <DMS201001 {...props} />
+      </Provider>
+    ),
+    () => DMS201001,
+  );
+  Navigation.registerComponent(
+    'screen.DMS201101',
+    () => props => (
+      <Provider store={store}>
+        <DMS201101 {...props} />
+      </Provider>
+    ),
+    () => DMS201101,
+  );
+
+  Navigation.registerComponent(
+    'screen.DMS201201',
+    () => props => (
+      <Provider store={store}>
+        <DMS201201 {...props} />
+      </Provider>
+    ),
+    () => DMS201201,
+  );
+  Navigation.registerComponent(
+    'screen.DMS201202',
+    () => props => (
+      <Provider store={store}>
+        <DMS201202 {...props} />
+      </Provider>
+    ),
+    () => DMS201202,
+  );
+  Navigation.registerComponent(
+    'screen.DMS201301',
+    () => props => (
+      <Provider store={store}>
+        <DMS201301 {...props} />
+      </Provider>
+    ),
+    () => DMS201301,
+  );
+  Navigation.registerComponent(
+    'screen.DMS201302',
+    () => props => (
+      <Provider store={store}>
+        <DMS201302 {...props} />
+      </Provider>
+    ),
+    () => DMS201302,
+  );
+  Navigation.registerComponent(
+    'screen.DMS201303',
+    () => props => (
+      <Provider store={store}>
+        <DMS201303 {...props} />
+      </Provider>
+    ),
+    () => DMS201303,
   );
 };

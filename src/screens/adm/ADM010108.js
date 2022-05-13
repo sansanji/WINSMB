@@ -759,8 +759,8 @@ class Component extends NavigationScreen {
               source={{
                 uri: fileUrl,
                 headers: {
-                  'X-CSRF-TOKEN': globalThis.gToken,
-                  Cookie: globalThis.gCookie,
+                  'X-CSRF-TOKEN': GLOBAL.gToken,
+                  Cookie: GLOBAL.gCookie,
                   // withCredentials: true,
                 },
               }}

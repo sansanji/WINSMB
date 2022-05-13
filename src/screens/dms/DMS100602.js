@@ -22,7 +22,7 @@ import { HBaseView, Touchable, HButton, HIcon, HTexttitle, HCombobox } from 'ux'
 
 class Component extends NavigationScreen {
   constructor(props) {
-    super(props, 'DMS100601');
+    super(props, 'DMS100602');
     this.state = {
       GR_NO: null,
       VENDOR_NAME: null,
@@ -36,11 +36,11 @@ class Component extends NavigationScreen {
       barcodeStatus: null,
       data: null,
     };
-    modelUtil.setModelData('DMS100601', { CHANGE_TYPE: 'LOCATION', CHANGE_TYPE_NAME: 'Location' });
+    modelUtil.setModelData('DMS100602', { CHANGE_TYPE: 'REMARKS', CHANGE_TYPE_NAME: 'Remarks' });
   }
 
-  componentWillMount() {
-    // this._validCheckFunc(null); // 모든 화면은 기본적으로 dmsWhcode와 vendor정보가 필요하기 때문에 체크 로직을 태운다.
+  async componentWillMount() {
+    this._validCheckFunc('alert'); // 모든 화면은 기본적으로 dmsWhcode와 vendor정보가 필요하기 때문에 체크 로직을 태운다.
   }
 
   componentDidMount() {
@@ -53,7 +53,7 @@ class Component extends NavigationScreen {
   async fetch(barcode1Data) {
     const blockDup = this.props.global.config.DMS_BLOCK_DUP;
     const { config } = ReduxStore.getState().global;
-    const changeType = modelUtil.getValue('DMS100601.CHANGE_TYPE');
+    const changeType = modelUtil.getValue('DMS100602.CHANGE_TYPE');
     let tabCode = null;
     Vibration.vibrate(500);
     const whCode = _.get(this.props.global, 'dmsWhcode.WH_CODE', null);
@@ -83,7 +83,7 @@ class Component extends NavigationScreen {
         ) {
           // 스캔 실패한 경우
           this.deleteLoc(
-            `Please scan ${modelUtil.getValue('DMS100601.CHANGE_TYPE_NAME')} Barcord.`,
+            `Please scan ${modelUtil.getValue('DMS100602.CHANGE_TYPE_NAME')} Barcord.`,
           );
           this.failScan();
           return;
@@ -210,11 +210,11 @@ class Component extends NavigationScreen {
 
   // 창고코드 및 벤더 정보 유무 체크
   _validCheckFunc(alertType) {
-    const validCheck = Util.validCheckFunc(alertType);
-
-    if (validCheck) {
-      this.fetch('', null);
-    }
+    Util.dmsValidCheckFunc(alertType);
+    // const validCheck = Util.dmsValidCheckFunc(alertType);
+    // if (validCheck) {
+    //   this.fetch('', null);
+    // }
   }
 
   // 바코드 스캔 처리 로직
@@ -328,13 +328,15 @@ class Component extends NavigationScreen {
           <HCombobox
             label={'Change Type'}
             groupJson={[
-              { DT_CODE: 'LOCATION', LOC_VALUE: 'Location' },
-              { DT_CODE: 'DOC_NO', LOC_VALUE: 'Doc No' },
               { DT_CODE: 'REMARKS', LOC_VALUE: 'Remarks' },
+              { DT_CODE: 'DOC_NO', LOC_VALUE: 'Doc No' },
+              { DT_CODE: 'LOCATION', LOC_VALUE: 'Location' },
+
+
             ]}
             bindVar={{
-              CD: 'DMS100601.CHANGE_TYPE',
-              NM: 'DMS100601.CHANGE_TYPE_NAME',
+              CD: 'DMS100602.CHANGE_TYPE',
+              NM: 'DMS100602.CHANGE_TYPE_NAME',
             }}
             editable
             require

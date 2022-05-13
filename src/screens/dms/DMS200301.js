@@ -2,7 +2,7 @@
  * Import Common
  * */
 import { View, Text, TextInput, StyleSheet, Alert, Keyboard, Vibration, TouchableOpacity } from 'react-native';
-import { _, React, Redux, Fetch, Navigation, NavigationScreen, Util, bluecolor, modelUtil, ReduxStore } from 'libs';
+import { _, React, Redux, Fetch, Navigation, NavigationScreen, Util, bluecolor, modelUtil, ReduxStore, moment } from 'libs';
 import {
   HBaseView,
   Touchable,
@@ -30,15 +30,18 @@ class Component extends NavigationScreen {
   constructor(props) {
     super(props, 'DMS200301');
 
+    const hh = moment().format('hh');
+    const mm = moment().format('mm');
+
     this.state = {
       data: [],
       status: null,
       taskStep: '1', // 1: 확정버튼 활성화, 2: 취소버튼 활성화
       // 클로즈 기능으로 신규추가
-      TIME_HOUR_NAME: '00',
-      TIME_MIN_NAME: '00',
-      BT_TIME_HOUR_NAME: '00',
-      BT_TIME_MIN_NAME: '00',
+      TIME_HOUR_NAME: hh,
+      TIME_MIN_NAME: mm,
+      BT_TIME_HOUR_NAME: hh,
+      BT_TIME_MIN_NAME: mm,
       scanVaildData: null,
 
       VENDOR_CODE: this.props.global.dmsVendorcode.VENDOR_CODE,
@@ -63,10 +66,10 @@ class Component extends NavigationScreen {
       status: null,
       taskStep: '1', // 1: 확정버튼 활성화, 2: 취소버튼 활성화
       // 클로즈 기능으로 신규추가
-      TIME_HOUR_NAME: '00',
-      TIME_MIN_NAME: '00',
-      BT_TIME_HOUR_NAME: '00',
-      BT_TIME_MIN_NAME: '00',
+      TIME_HOUR_NAME: hh,
+      TIME_MIN_NAME: mm,
+      BT_TIME_HOUR_NAME: hh,
+      BT_TIME_MIN_NAME: mm,
       TAP_CODE: 'PLT',
 
       VENDOR_CODE: this.props.global.dmsVendorcode.VENDOR_CODE,
@@ -229,9 +232,15 @@ class Component extends NavigationScreen {
     //    GR_DATE: '20210624', // this.props.model.data.DMS200301.GR_DATE,
     //  }));
     const dataLength = this.state.data.length;
-    const barcode1Data = this.barcode1._lastNativeText;
+    let barcode1Data = null;
     let g1ScanData = null;
     let targetG1ScanData = null;
+
+    barcode1Data = this.barcode1._lastNativeText;
+    if (scanData) {
+      barcode1Data = scanData;
+    }
+
     modelUtil.setValue('DMS200301.barcodeData1', barcode1Data);
 
     for (let i = 0; i < dataLength; i += 1) {
@@ -242,6 +251,7 @@ class Component extends NavigationScreen {
         targetG1ScanData = this.state.data[i].SCAN_NO.trim();
         this.setState({
           scanVaildData: `"${targetG1ScanData}" already scanned!`,
+          barcodeData1: null,
         });
 
         this._setScanValidData('f');
@@ -251,9 +261,9 @@ class Component extends NavigationScreen {
       }
     }
 
-    this.setState({
-      scanVaildData: `"${barcode1Data}" already scanned!`,
-    });
+    // this.setState({
+    //   scanVaildData: `"${barcode1Data}" already scanned!`,
+    // });
     this._setScanValidData('a');
     this._sound('s');
 
@@ -264,7 +274,7 @@ class Component extends NavigationScreen {
       }),
     });
 
-    if (result1) {
+    if (result1.TYPE === 1) {
       // 정해진 데이터만 보여준다.
       if (result1.DMS030320G2[0]) {
         let totalData = '';
@@ -279,9 +289,10 @@ class Component extends NavigationScreen {
               MSG: result1.MSG,
             },
             barcodeData1: null,
+            scanData,
           },
-          scanData,
         );
+        this.barcode1.focus();
         Util.openLoader(this.screenId, false);
       } else {
         this.setState({
@@ -294,10 +305,10 @@ class Component extends NavigationScreen {
           buttonGroup: [
             {
               title: 'OK',
+              onPress: () => { this.barcode1.focus(); },
             },
           ],
         });
-
         Util.openLoader(this.screenId, false);
       }
     } else {
@@ -307,6 +318,7 @@ class Component extends NavigationScreen {
         buttonGroup: [
           {
             title: 'OK',
+            onPress: () => { this.barcode1.focus(); },
           },
         ],
       });
@@ -390,7 +402,6 @@ class Component extends NavigationScreen {
       scanVaildData: null,
       barcodeScanData: null,
       barcodeScanIndex: null,
-      successCnt: 0,
     });
     this.fetch(null);
   }
@@ -621,33 +632,6 @@ class Component extends NavigationScreen {
     });
   }
 
-
-  renderBarcode() {
-    return (
-      <View style={styles.spaceAroundStyle}>
-        <TextInput
-          style={(styles.barcodeInput, { flex: 1 })}
-          // ref="barcode1" // 빨간 줄 가도 무시하자!
-          ref={c => {
-            this.barcode1 = c;
-          }}
-          placeholder="Barcode"
-          onChangeText={barcodeData1 => this.setState({ barcodeData1 })}
-          value={this.state.barcodeData1}
-          autoFocus={this.state.GI_STATUS !== 'F'}
-          // autoFocus
-          blurOnSubmit={false}
-          keyboardType="email-address"
-          onSubmitEditing={() => {
-            this.focusNextField();
-          }}
-        />
-        <View style={styles.buttonStyle}>
-          <HButton onPress={() => this._clear()} name={'refresh'} />
-        </View>
-      </View>
-    );
-  }
 
   renderBody = (item, index, scanData, scanIndex) => (
     <View

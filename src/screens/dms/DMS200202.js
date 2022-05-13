@@ -75,6 +75,9 @@ class Component extends NavigationScreen {
       checkAll: 'N',
       setScanCnt: 1,
       CHANGE_TYPE: 'DOC_NO', // LOCATION/REMARKS
+      RemarkDup: 'Y',
+      DocDup: 'Y',
+      LocDup: 'Y',
     });
   }
 
@@ -139,7 +142,6 @@ class Component extends NavigationScreen {
 
   // DOC_NO, LOCATION, REMARK 정보 입력값으로 update
   async _saveLocation(checkNumber) {
-    const { config } = this.props.global;
     const blockDup = this.props.global.config.DMS_BLOCK_DUP || '';
     const whCode = _.get(this.props.global, 'dmsWhcode.WH_CODE', null);
     const changeType = modelUtil.getValue('DMS200202.CHANGE_TYPE');
@@ -287,7 +289,7 @@ class Component extends NavigationScreen {
       if (Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData2)) {
         barSeq += 1;
       } else {
-        this.scanBarcode(barcodeData1, barcodeData2, barcodeData3);
+        this.scanBarcode(barcodeData1, barcodeData2, barcodeData3, scanData);
         return;
       }
     } else if (this.state.locationTarget === 'Y' && this.state.remarkTarget === 'Y') {
@@ -297,7 +299,7 @@ class Component extends NavigationScreen {
       } else if (Util.isEmpty(this.state.barcodeData3) && Util.isEmpty(barcodeData3)) {
         barSeq += 1;
       } else {
-        this.scanBarcode(barcodeData1, barcodeData2, barcodeData3);
+        this.scanBarcode(barcodeData1, barcodeData2, barcodeData3, scanData);
         return;
       }
     } else if (this.state.locationTarget === 'N' && this.state.remarkTarget === 'Y') {
@@ -305,12 +307,12 @@ class Component extends NavigationScreen {
       if (Util.isEmpty(this.state.barcodeData3) && Util.isEmpty(barcodeData3)) {
         barSeq += 2;
       } else {
-        this.scanBarcode(barcodeData1, barcodeData2, barcodeData3);
+        this.scanBarcode(barcodeData1, barcodeData2, barcodeData3, scanData);
         return;
       }
     } else {
       // doc 만 스캔하는 경우
-      this.scanBarcode(barcodeData1, barcodeData2, barcodeData3);
+      this.scanBarcode(barcodeData1, barcodeData2, barcodeData3, scanData);
       return;
     }
 
@@ -325,7 +327,7 @@ class Component extends NavigationScreen {
 
 
   // 바코드 스캔 처리 로직
-  async scanBarcode(barcodeData1, barcodeData2, barcodeData3) {
+  async scanBarcode(barcodeData1, barcodeData2, barcodeData3, scanData) {
     const autoConfirmYN = this.props.global.config.DMS_AUTO_CONFIRM_YN;
     const dataLenght = this.state.dataTotal.length;
     const dataList = this.state.data;
@@ -333,6 +335,11 @@ class Component extends NavigationScreen {
     let scanCnt = Number(this.state.successCnt);
     const fixLoc = modelUtil.getValue('DMS200202.fixLoc');
     const fixRemark = modelUtil.getValue('DMS200202.fixRemark');
+
+    if (this.checkDupBoxYN(barcodeData1, barcodeData2, barcodeData3) === 'Y') {
+      this._onClearBarcode('barcodeAll', scanData);
+      return;
+    }
 
     let setCnt = modelUtil.getValue('DMS200202.setScanCnt'); // 사용자가 설정한 한번에 스캔하고자하는 값
     let cnt = 0; // 사용자가 설정한 값 만큼 for문을 돌기위해 counting 해줌
@@ -370,7 +377,7 @@ class Component extends NavigationScreen {
 
         // 스캔 성공했을 때,
         this.setState({
-          scanVaildData: `  "${setCnt} scan success.`,
+          scanVaildData: `  "${barcodeData1} scan success.`,
           barcodeScanData: barcodeData1,
           barcodeScanIndex: currentIndex,
           data: dataList,
@@ -422,13 +429,70 @@ class Component extends NavigationScreen {
     this.barcode[0].focus();
   }
 
+  checkDupBoxYN(barcodeData1, barcodeData2, barcodeData3) {
+    const DocDup = modelUtil.getValue('DMS200202.DocDup');
+    const LocDup = modelUtil.getValue('DMS200202.LocDup');
+    const RemarkDup = modelUtil.getValue('DMS200202.RemarkDup');
+
+    if (DocDup === 'Y' && !Util.isEmpty(barcodeData1)) {
+      if (this.checkDuplication(barcodeData1, 'DOC') === 'Y') {
+        return 'Y';
+      }
+    }
+
+    if (LocDup === 'Y' && !Util.isEmpty(barcodeData2)) {
+      if (this.checkDuplication(barcodeData2, 'LOC') === 'Y') {
+        return 'Y';
+      }
+    }
+
+    if (RemarkDup === 'Y' && !Util.isEmpty(barcodeData3)) {
+      if (this.checkDuplication(barcodeData3, 'REMARKS') === 'Y') {
+        return 'Y';
+      }
+    }
+  }
+
+  checkDuplication(scanData, listType) {
+    const dataLength = this.state.data.length;
+    let ListData = null;
+
+    for (let i = 0; i < dataLength; i += 1) {
+      if (listType === 'DOC') {
+        ListData = this.state.data[i].DOC_NO.toUpperCase().trim();
+      } else if (listType === 'LOC') {
+        ListData = this.state.data[i].LOCATION.toUpperCase().trim();
+      } else {
+        ListData = this.state.data[i].REMARKS.toUpperCase().trim();
+      }
+
+      if (scanData.toUpperCase().trim() === ListData) {
+        Util.msgBox({
+          title: 'alert',
+          msg: `${scanData} is already scaned`,
+          buttonGroup: [
+            {
+              title: 'OK',
+              onPress: () => {
+                this.setState({
+                  scanVaildData: null,
+                });
+              },
+            },
+          ],
+        });
+        return 'Y';
+      }
+    }
+  }
+
   failScan() {
     this.scanVaildData.setNativeProps({ style: styles.textVaildScanFailure });
     Util.playSound('failSound');
     this.setState({ spinner: false });
   }
 
-  _onClearBarcode(barcodeType) {
+  _onClearBarcode(barcodeType, scanData) {
     if (barcodeType === 'barcode1') {
       this.barcode[0].clear();
       this.setState({
@@ -439,11 +503,32 @@ class Component extends NavigationScreen {
       this.setState({
         barcodeData2: null,
       });
-    } else {
+    } else if (barcodeType === 'barcode3') {
       this.barcode[2].clear();
       this.setState({
         barcodeData3: null,
       });
+    } else {
+      if (!Util.isEmpty(scanData)) {
+        if (!Util.isEmpty(this.barcode[0])) {
+          this.barcode[0].clear();
+        }
+
+        if (!Util.isEmpty(this.barcode[1])) {
+          this.barcode[1].clear();
+        }
+
+        if (!Util.isEmpty(this.barcode[2])) {
+          this.barcode[2].clear();
+        }
+      }
+      this.setState({
+        barcodeData1: null,
+        barcodeData2: null,
+        barcodeData3: null,
+        barSeq: 0,
+      });
+      this.barcode[0].focus();
     }
   }
 
@@ -713,6 +798,13 @@ class Component extends NavigationScreen {
           <HCheckbox label={'remark fix'} bind={'DMS200202.fixRemark'} editable={this.state.remarkTarget === 'Y'} />
 
         </HRow>
+
+        <HRow style={styles.checkBox}>
+          <HCheckbox label={'Doc Duplication'} bind={'DMS200202.DocDup'} editable />
+          <HCheckbox label={'Loc Duplication'} bind={'DMS200202.LocDup'} editable />
+          <HCheckbox label={'Remark Duplication'} bind={'DMS200202.RemarkDup'} editable />
+        </HRow>
+
         <View style={styles.spaceAroundStyle}>
           <TextInput
             rowflex={3}
@@ -803,15 +895,6 @@ class Component extends NavigationScreen {
             </HText>
           </View>
           <HTexttitle>From</HTexttitle>
-          <View style={styles.scanArea}>
-            <Text style={styles.textTopStyle}>{this.state.GR_NO}</Text>
-            <Text style={styles.textTopStyle}>{this.state.VENDOR_NAME}</Text>
-            <Text style={styles.textTopStyle}>{this.state.REF_NO}</Text>
-            <Text style={styles.textTopStyle}>{this.state.LOCATION}</Text>
-            <Text style={styles.textTopStyle}>
-              {this.state.STOCK_DAYS ? `${this.state.STOCK_DAYS} Days` : null}
-            </Text>
-          </View>
           <HListView
             keyExtractor={item => item.GR_NO + item.SCAN_NO}
             renderItem={({ item, index }) => this.renderBody(item, index)}
@@ -958,7 +1041,7 @@ const styles = StyleSheet.create({
     paddingLeft: 3,
   },
   checkBox: {
-    marginStart: 15,
+    marginStart: 10,
     paddingLeft: 8,
   },
   // buttonContainer: {

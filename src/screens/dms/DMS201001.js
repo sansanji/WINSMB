@@ -10,11 +10,10 @@ import {
   Fetch,
   Navigation,
   NavigationScreen,
-  ReduxStore,
   bluecolor,
   modelUtil,
 } from 'libs';
-import { HBaseView, Touchable, HButton, HIcon, HTexttitle, HCombobox, HCheckbox, HRow, HText } from 'ux';
+import { HBaseView, Touchable, HButton, HIcon, HTexttitle, HRow, HText } from 'ux';
 
 /**
  * 신버전 위치이동 버전
@@ -22,7 +21,7 @@ import { HBaseView, Touchable, HButton, HIcon, HTexttitle, HCombobox, HCheckbox,
 
 class Component extends NavigationScreen {
   constructor(props) {
-    super(props, 'DMS100601');
+    super(props, 'DMS201001');
     this.state = {
       GR_NO: null,
       VENDOR_NAME: null,
@@ -35,33 +34,23 @@ class Component extends NavigationScreen {
       barcodeData1: null,
       barcodeData2: null,
       barcodeData3: null,
-      barcodeData4: null,
       scanVaildData: null,
       barcodeStatus: null,
       data: null,
-      docTarget: 'N',
-      locationTarget: 'Y',
-      remarkTarget: 'N',
       barSeq: 0,
       barcode1Data: null,
       itemScanYN: 'N',
       saveLoc: 'N',
     };
 
-    modelUtil.setModelData('DMS100601', {
-      CHANGE_TYPE: 'LOCATION',
-      CHANGE_TYPE_NAME: 'Location',
-      fixDoc: 'N',
-      fixLoc: 'N',
-      fixRemark: 'N',
+    modelUtil.setModelData('DMS201001', {
+      // CHANGE_TYPE: 'LOCATION',
     });
-
-    // modelUtil.setModelData('DMS100601', { CHANGE_TYPE: 'LOCATION', CHANGE_TYPE_NAME: 'Location' });
   }
 
   componentWillMount() {
     this.barcode = [];
-    // this._validCheckFunc(null); // 모든 화면은 기본적으로 dmsWhcode와 vendor정보가 필요하기 때문에 체크 로직을 태운다.
+    this._validCheckFunc('alert'); // 모든 화면은 기본적으로 dmsWhcode와 vendor정보가 필요하기 때문에 체크 로직을 태운다.
   }
 
   componentDidMount() {
@@ -78,11 +67,6 @@ class Component extends NavigationScreen {
     let barcodeData1 = this.state.barcodeData1;
     let barcodeData2 = this.state.barcodeData2;
     let barcodeData3 = this.state.barcodeData3;
-    let barcodeData4 = this.state.barcodeData4;
-
-    const docTarget = this.state.docTarget;
-    const remarkTarget = this.state.remarkTarget;
-    const locationTarget = this.state.locationTarget;
 
     if (scanData) {
       barcodeData = scanData;
@@ -90,124 +74,68 @@ class Component extends NavigationScreen {
     if (!barcodeData) {
       this.deleteAll('Please, Input the barcode data!');
       this.failScan();
+      barSeq = 0;
       return;
     }
 
+    // Doc 유효성 체크로직
+    if (!Util.isEmpty(barcodeData2)) {
+      let detailDocNO = null;
 
-    if ((locationTarget === 'N' || Util.isEmpty(locationTarget)) && (docTarget === 'N' || Util.isEmpty(docTarget)) && (remarkTarget === 'N' || Util.isEmpty(remarkTarget))) {
-      this.fetchOnlyItem(barcodeData);
-      return;
-      // this._resetState(this.fetch(barcodeData1));
+      if (!Util.isEmpty(this.state.DOC_NO)) {
+        detailDocNO = this.state.DOC_NO.substr(1);
+      }
+      if (barcodeData2.indexOf(detailDocNO) === -1) {
+        this.setState({
+          scanVaildData: 'Please scan Correct Doc format',
+          barcodeData3: null,
+        });
+        if (!Util.isEmpty(this.barcode[1])) {
+          this.scanVaildData.setNativeProps({ style: styles.textVaildScanFailure });
+          Util.playSound('failSound');
+        }
+        this.barcode[1].clear();
+        this.barcode[1].focus();
+        return;
+      }
+      this.setState({
+        scanVaildData: `"${barcodeData2}" Scan Success! Please Next Scan`,
+        barcodeData3: null,
+      });
+      this.scanVaildData.setNativeProps({ style: styles.textVaildScanSucess });
     }
-
-
     // 스캔된 바코드를 화면에 입력해 주는 부분
     if (barSeq === 0) {
       barcodeData1 = barcodeData;
     } else if (barSeq === 1) {
       barcodeData2 = barcodeData;
-    } else if (barSeq === 2) {
-      barcodeData3 = barcodeData;
     } else {
-      barcodeData4 = barcodeData;
+      barcodeData3 = barcodeData;
     }
 
     this.setState({
       barcodeData1,
       barcodeData2,
       barcodeData3,
-      barcodeData4,
     });
 
     // ********** focus 이동 부분 시작 ****************
-    // 스캔 순서 : 아이템 - 로케이션 - 디오씨- 리마크
+    // 스캔 순서 : 아이템 -  디오씨- 창고코드
     // 아이템은 default값으로 없는경우 스캔해 준다.
     if (Util.isEmpty(this.state.barcode1Data)) {
       this.fetch(barcodeData1);
-      if (this.state.itemScanYN === 'Y' && barSeq !== 0) {
-        // 아이템을 스캔했을때,
-        barSeq += 1;
-
-
-        this.barcode[barSeq].clear();
-        this.barcode[barSeq].focus();
-
-        this.setState({
-          barSeq,
-        });
-      }
       return;
     }
 
-    // toggle값에 따른 포커스 이동 부분
-    if (locationTarget === 'N' && docTarget === 'N' && remarkTarget === 'Y') {
-      if (Util.isEmpty(this.state.barcodeData4) && Util.isEmpty(barcodeData4)) {
-        barSeq += 3;
-      } else {
-        this.fetch(this.state.barcode1Data, null, null, barcodeData4);
-        return;
-      }
-    } else if (locationTarget === 'Y' && docTarget === 'N' && remarkTarget === 'N') {
-      if (Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData2)) {
-        barSeq += 1;
-      } else {
-        this.fetch(this.state.barcode1Data, barcodeData2, null, null);
-        return;
-      }
-    } else if (locationTarget === 'N' && docTarget === 'Y' && remarkTarget === 'N') {
-      if (Util.isEmpty(this.state.barcodeData3) && Util.isEmpty(barcodeData3)) {
-        barSeq += 2;
-      } else {
-        this.fetch(this.state.barcode1Data, null, barcodeData3, null);
-        return;
-      }
-    } else if (locationTarget === 'Y' && docTarget === 'N' && remarkTarget === 'Y') {
-      if (Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData2)) {
-        barSeq += 1;
-      } else if (!Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData4)) {
-        barSeq += 3;
-      } else if (Util.isEmpty(this.state.barcodeData4) && Util.isEmpty(barcodeData4)) {
-        barSeq += 2;
-      } else {
-        this.fetch(this.state.barcode1Data, barcodeData2, null, barcodeData4);
-        return;
-      }
-    } else if (locationTarget === 'N' && docTarget === 'Y' && remarkTarget === 'Y') {
-      if (Util.isEmpty(this.state.barcodeData3) && Util.isEmpty(barcodeData3)) {
-        barSeq += 2;
-      } else if (Util.isEmpty(this.state.barcodeData4) && Util.isEmpty(barcodeData4)) {
-        barSeq += 1;
-      } else {
-        this.fetch(this.state.barcode1Data, null, barcodeData3, barcodeData4);
-        return;
-      }
-    } else if (locationTarget === 'Y' && docTarget === 'Y' && remarkTarget === 'N') {
-      if (Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData2)) {
-        barSeq += 1;
-      } else if (!Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData3)) {
-        barSeq += 2;
-      } else if (Util.isEmpty(this.state.barcodeData3) && Util.isEmpty(barcodeData3)) {
-        barSeq += 1;
-      } else {
-        this.fetch(this.state.barcode1Data, barcodeData2, barcodeData3, null);
-        return;
-      }
-    } else if (locationTarget === 'Y' && docTarget === 'Y' && remarkTarget === 'Y') {
-      if (Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData2)) {
-        barSeq += 1;
-      } else if (!Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData3)) {
-        barSeq += 2;
-      } else if (!Util.isEmpty(this.state.barcodeData2) && !Util.isEmpty(this.state.barcodeData3) && Util.isEmpty(barcodeData4)) {
-        barSeq += 3;
-      } else if (Util.isEmpty(this.state.barcodeData3) && Util.isEmpty(barcodeData3)) {
-        barSeq += 1;
-      } else if (Util.isEmpty(this.state.barcodeData4) && Util.isEmpty(barcodeData4)) {
-        barSeq += 1;
-      } else {
-        this.fetch(this.state.barcode1Data, barcodeData2, barcodeData3, barcodeData4);
-        return;
-      }
+    if (Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData2)) {
+      barSeq += 1;
+    } else if (!Util.isEmpty(this.state.barcodeData2) && Util.isEmpty(barcodeData3)) {
+      barSeq += 1;
+    } else {
+      this.fetch(this.state.barcode1Data, barcodeData2, barcodeData3);
+      return;
     }
+
     this.barcode[barSeq].clear();
     this.barcode[barSeq].focus();
 
@@ -218,97 +146,17 @@ class Component extends NavigationScreen {
   }
 
 
-  async fetch(barcodeData1, barcodeData2, barcodeData3, barcodeData4) {
-    const blockDup = this.props.global.config.DMS_BLOCK_DUP;
-    // const { config } = ReduxStore.getState().global;
-    const changeType = modelUtil.getValue('DMS100601.CHANGE_TYPE');
-    let tabCode = null;
+  async fetch(barcodeData1, barcodeData2, barcodeData3) {
     Vibration.vibrate(500);
-    const whCode = _.get(this.props.global, 'dmsWhcode.WH_CODE', null);
-    const fixLoc = modelUtil.getValue('DMS100601.fixLoc');
-    const fixDoc = modelUtil.getValue('DMS100601.fixDoc');
-    const fixRemark = modelUtil.getValue('DMS100601.fixRemark');
-    const saveLoc = this.state.saveLoc;
-
-    const barSeq = this.state.barSeq;
-
-    // const vendorCode = _.get(this.props.global, 'dmsVendorcode.VENDOR_CODE', null);
-    // const vendorPlantCode = _.get(this.props.global,
-    // 'dmsVendorcode.VENDOR_PLANT_CODE', null); barcode1Data = 'ITWH13180329000221';
-
-    // 로케이션이 fix인 경우 fetch가 된 후 자동으로 한번 스캔 넘어가 준다.
-    // if (fixLoc === 'Y' && this.state.barcodeData2) {
-    //   this._focusNextField();
-    //   return;
-    // }
-
-    // || (fixLoc === 'Y' && saveLoc === 'Y')
     if (!Util.isEmpty(this.state.data)) {
-      // tabCode가 GR_DT일 경우 로케이션 중복검사를 하지않는다.M_GR_DT은 중복검사한다.
-      // 상세인지 세부상세인지 STK_NO의 유무를 보고 판단
-      if (this.state.data[0].TYPE === 'DT') {
-        tabCode = 'DT';
-      } else if (this.state.data[0].TYPE === 'PLT') {
-        tabCode = 'PLT';
-      } else if (this.state.data[0].TYPE === 'BOX') {
-        tabCode = 'BOX';
-      } else if (this.state.data[0].TYPE === 'ITM') {
-        tabCode = 'ITEM';
-      }
+      this.state.data[0].DOC_NO = barcodeData2;
+      this.state.data[0].MOVE_WH_CODE = barcodeData3;
 
-      // 스캔된재고아이템에 로케이션 등록
-      // this.state.data[0][changeType] = barcode1Data;
-      this.state.data[0].LOCATION = barcodeData2;
-      this.state.data[0].DOC_NO = barcodeData3;
-      this.state.data[0].REMARKS = barcodeData4;
-
-      // if (barcodeData1 !== null && barcodeData1 !== '') {
-      //   if (
-      //     Util.dmsCheckBarcode(barcodeData1) === 'ITEM' ||
-      //     Util.dmsCheckBarcode(barcodeData1) === 'PLT' ||
-      //     Util.dmsCheckBarcode(barcodeData1) === 'BOX'
-      //   ) {
-      //     // 스캔 실패한 경우
-      //     this.deleteLoc(
-      //       `Please scan ${modelUtil.getValue('DMS100601.CHANGE_TYPE_NAME')} Barcord.`,
-      //     );
-      //     this.failScan();
-      //     return;
-      //   }
-      // }
-
-      // Location format 체크로직
-      if (!Util.isEmpty(barcodeData2)) {
-        if (barcodeData2.indexOf('-') < 1 || barcodeData2.length !== 9) {
-          this.deleteLoc('Please scan Correct Location format');
-          this.failScan();
-          return;
-        }
-
-        if (barcodeData2.substr(3, 1) !== '-' || barcodeData2.substr(6, 1) !== '-') {
-          this.deleteLoc('Please scan Correct Location format');
-          this.failScan();
-          return;
-        }
-      }
-      // 타입별로 저장하는 컬럼을 변경
-      // let reqService = 'saveLoc';
-      // if (changeType === 'DOC_NO') {
-      //   reqService = 'saveDoc';
-      // }
-      // if (changeType === 'REMARKS') {
-      //   reqService = 'saveRemarks';
-      // }
-      const result = await Fetch.request('DMS030510SVC', 'saveLoc', {
+      const result = await Fetch.request('DMS030510SVC', 'saveWHMove', {
         body: JSON.stringify({
           DMS030510F1: {
-            WH_CODE: whCode,
-            TAB_CODE: tabCode,
-            CHANGE_TYPE: changeType,
-            DMS_BLOCK_DUP: blockDup,
-            LOCATION: barcodeData2,
-            DOC_NO: barcodeData3,
-            REMARKS: barcodeData4,
+            DOC_NO: barcodeData2,
+            MOVE_WH_CODE: barcodeData3,
           },
           DMS030510G1: {
             data: this.state.data,
@@ -320,29 +168,21 @@ class Component extends NavigationScreen {
         if (result.TYPE === 1) {
           // 스캔 성공한 경우
           this.setState({
-            scanVaildData: `"${this.state.SCAN_NO}" change to "${barcodeData1}" Success!`,
-            MOVED_LOCATION: barcodeData1,
+            scanVaildData: `"${this.state.SCAN_NO}" W/H change Success!`,
+            DOC_NO: barcodeData1,
             spinner: false,
             data: null,
             barcode1Data: null,
           });
-          if (fixLoc === 'Y') {
-            this.setState({
-              saveLoc: 'Y',
-            });
-          }
 
           // 바코드 초기화
           this._onClearBarcode('barcode1');
 
-          if (barcodeData2 && fixLoc === 'N') {
+          if (barcodeData2) {
             this._onClearBarcode('barcode2');
           }
-          if (barcodeData3 && fixDoc === 'N') {
+          if (barcodeData3) {
             this._onClearBarcode('barcode3');
-          }
-          if (barcodeData4 && fixRemark === 'N') {
-            this._onClearBarcode('barcode4');
           }
 
           this.setState({
@@ -370,9 +210,9 @@ class Component extends NavigationScreen {
         return;
       }
 
-      if (Util.checkBarcode(barcodeData1) === 'LOC') {
+      if (Util.checkBarcode(barcodeData1) === 'PLT') {
         // 스캔 실패한 경우
-        this.deleteLoc('Please scan Item Barcord.');
+        this.deleteLoc('Please scan PLT Barcord.');
         this._onClearBarcode('barcode1');
         this.failScan();
 
@@ -381,25 +221,22 @@ class Component extends NavigationScreen {
         return;
       }
 
-      const result2 = await Fetch.request('DMS030511SVC', 'getStockAll', {
+      const result2 = await Fetch.request('DMS030511SVC', 'getStockLotteWH', {
         body: JSON.stringify({
           DMS030511F1: {
-            WH_CODE: whCode,
             SCAN_NO: barcodeData1,
-            EXIST_YN: 'Y',
-            GRGI_DAY: 'GR',
-            GR_FLAG: 'N',
-            LOC_YN: 'N',
           },
         }),
       });
 
-      if (result2) {
+      if (result2.TYPE === 1) {
         if (result2.DMS030511G6[0]) {
           result2.DMS030511G6[0].SCAN_NO = barcodeData1;
           // 스캔 성공한 경우
           this.setState({
             scanVaildData: `"${result2.DMS030511G6[0].SCAN_NO}" Scan Success!`,
+            WH_CODE: result2.DMS030511G6[0].WH_CODE,
+            WH_NAME: result2.DMS030511G6[0].WH_NAME,
             VENDOR_NAME: result2.DMS030511G6[0].VENDOR_NAME,
             BUYER_NAME: result2.DMS030511G6[0].BUYER_NAME,
             GR_NO: result2.DMS030511G6[0].GR_NO,
@@ -418,6 +255,7 @@ class Component extends NavigationScreen {
             BOX_QTY: result2.DMS030511G6[0].BOX_QTY,
             ITEM_QTY: result2.DMS030511G6[0].ITEM_QTY,
             GW: result2.DMS030511G6[0].GW,
+            DETAIL_DOC_NO: result2.DMS030511G6[0].DETAIL_DOC_NO,
 
             MOVED_LOCATION: null,
             spinner: false,
@@ -437,17 +275,10 @@ class Component extends NavigationScreen {
   }
 
   async fetchOnlyItem(barcodeData1) {
-    const whCode = _.get(this.props.global, 'dmsWhcode.WH_CODE', null);
-
-    const result2 = await Fetch.request('DMS030511SVC', 'getStockAll', {
+    const result2 = await Fetch.request('DMS030511SVC', 'getStockLotteWH', {
       body: JSON.stringify({
         DMS030511F1: {
-          WH_CODE: whCode,
           SCAN_NO: barcodeData1,
-          EXIST_YN: 'Y',
-          GRGI_DAY: 'GR',
-          GR_FLAG: 'N',
-          LOC_YN: 'N',
         },
       }),
     });
@@ -458,6 +289,8 @@ class Component extends NavigationScreen {
         // 스캔 성공한 경우
         this.setState({
           scanVaildData: `"${result2.DMS030511G6[0].SCAN_NO}" Scan Success!`,
+          WH_CODE: result2.DMS030511G6[0].WH_CODE,
+          WH_NAME: result2.DMS030511G6[0].WH_NAME,
           VENDOR_NAME: result2.DMS030511G6[0].VENDOR_NAME,
           BUYER_NAME: result2.DMS030511G6[0].BUYER_NAME,
           GR_NO: result2.DMS030511G6[0].GR_NO,
@@ -476,6 +309,7 @@ class Component extends NavigationScreen {
           BOX_QTY: result2.DMS030511G6[0].BOX_QTY,
           ITEM_QTY: result2.DMS030511G6[0].ITEM_QTY,
           GW: result2.DMS030511G6[0].GW,
+          DETAIL_DOC_NO: result2.DMS030511G6[0].DETAIL_DOC_NO,
 
 
           MOVED_LOCATION: null,
@@ -497,11 +331,11 @@ class Component extends NavigationScreen {
 
   // 창고코드 및 벤더 정보 유무 체크
   _validCheckFunc(alertType) {
-    const validCheck = Util.validCheckFunc(alertType);
-
-    if (validCheck) {
-      this.fetch('', null);
-    }
+    Util.dmsValidCheckFunc(alertType);
+    // const validCheck = Util.dmsValidCheckFunc(alertType);
+    // if (validCheck) {
+    //   this.fetch('', null);
+    // }
   }
 
 
@@ -517,7 +351,6 @@ class Component extends NavigationScreen {
       barcodeData1: null,
       barcodeData2: null,
       barcodeData3: null,
-      barcodeData4: null,
       barcode1Data: null,
       scanVaildData: null,
       barcodeStatus: null,
@@ -532,9 +365,6 @@ class Component extends NavigationScreen {
     }
     if (!Util.isEmpty(this.barcode[2])) {
       this.barcode[2].clear();
-    }
-    if (!Util.isEmpty(this.barcode[3])) {
-      this.barcode[3].clear();
     }
     this.barcode[0].focus();
     Keyboard.dismiss();
@@ -551,15 +381,10 @@ class Component extends NavigationScreen {
       this.setState({
         barcodeData2: null,
       });
-    } else if (barcodeType === 'barcode3') {
+    } else {
       this.barcode[2].clear();
       this.setState({
         barcodeData3: null,
-      });
-    } else {
-      this.barcode[3].clear();
-      this.setState({
-        barcodeData4: null,
       });
     }
   }
@@ -571,9 +396,15 @@ class Component extends NavigationScreen {
   }
 
   failScan() {
+    this.setState({
+      scanVaildData: 'Scan Fail',
+    });
+    if (this.scanVaildData) {
+      this.scanVaildData.setNativeProps({ style: styles.textVaildScanFailure });
+      Util.playSound('failSound');
+    }
     this.barcode[0].focus();
-    this.scanVaildData.setNativeProps({ style: styles.textVaildScanFailure });
-    Util.playSound('failSound');
+    this.barcode[0].clear();
   }
 
   deleteAll(msg) {
@@ -587,14 +418,6 @@ class Component extends NavigationScreen {
       MOVED_LOCATION: null,
       spinner: false,
       data: null,
-    });
-  }
-
-  deleteLoc(msg) {
-    this.setState({
-      scanVaildData: msg,
-      MOVED_LOCATION: null,
-      spinner: false,
     });
   }
 
@@ -614,34 +437,16 @@ class Component extends NavigationScreen {
     this._focusNextField(result);
   }
 
-
-  _locationChecked() {
-    this.setState({ locationTarget: this.state.locationTarget === 'Y' ? 'N' : 'Y' });
-    this._resetState();
-  }
-
-  _remarkChecked() {
-    this.setState({ remarkTarget: this.state.remarkTarget === 'Y' ? 'N' : 'Y' });
-    this._resetState();
-  }
-
-  _docChecked() {
-    this.setState({ docTarget: this.state.docTarget === 'Y' ? 'N' : 'Y' });
-    this._resetState();
-  }
-
   // 해당 화면의 데이터 초기화
   _resetState(barcodeData1) {
     this.setState({
       barcodeData1: null,
       barcodeData2: null,
       barcodeData3: null,
-      barcodeData4: null,
       scanVaildData: null,
       // locationTarget: true,
       barcode1Focus: false,
       barcode2Focus: false,
-      barcode3Focus: false,
       locationEditable: false,
       docEditable: false,
       reqAreaIgnore: null,
@@ -649,11 +454,14 @@ class Component extends NavigationScreen {
       barcodeZoneCode: null,
 
       // 조회된 data값 null로 초기화 시키기
+      WH_CODE: null,
+      WH_NAME: null,
       DOC_NO: null,
       SCAN_NO: null,
       TYPE: null,
       GR_DATE_TIME: null,
       GR_REF_NO: null,
+      DETAIL_DOC_NO: null,
       ITEM_CODE: null,
       PLT_QTY: null,
       BOX_QTY: null,
@@ -684,9 +492,6 @@ class Component extends NavigationScreen {
     }
     if (!Util.isEmpty(this.barcode[2])) {
       this.barcode[2].clear();
-    }
-    if (!Util.isEmpty(this.barcode[3])) {
-      this.barcode[3].clear();
     }
     // this.fetch(null);
     this.barcode[0].focus();
@@ -721,82 +526,38 @@ class Component extends NavigationScreen {
             </View>
           </View>
           <View style={styles.spaceAroundStyle}>
-            {this.state.locationTarget === 'Y' ? (
-              <TextInput
-                style={(styles.barcodeInput, { flex: 1 })}
-                ref={c => {
-                  this.barcode[1] = c;
-                }}
-                placeholder="Location"
-                onChangeText={barcodeData2 => this.setState({ barcodeData2 })}
-                value={this.state.barcodeData2}
-                keyboardType="email-address"
-                // editable={this.state.locationEditable}
-                // blurOnSubmit={this.state.barcode2Focus}
-                onSubmitEditing={() => {
-                  this._focusNextField();
-                }}
-              />
-            ) : null}
-            {this.state.docTarget === 'Y' ? (
-              <TextInput
-                style={(styles.barcodeInput, { flex: 1 })}
-                ref={c => {
-                  this.barcode[2] = c;
-                }}
-                placeholder="Doc No"
-                onChangeText={barcodeData3 => this.setState({ barcodeData3 })}
-                value={this.state.barcodeData3}
-                keyboardType="email-address"
-                // editable={this.state.docEditable}
-                // blurOnSubmit={this.state.barcode3Focus}
-                onSubmitEditing={() => {
-                  this._focusNextField();
-                }}
-              />
-            ) : null}
-            {this.state.remarkTarget === 'Y' ? (
-              <TextInput
-                style={(styles.barcodeInput, { flex: 1 })}
-                ref={c => {
-                  this.barcode[3] = c;
-                }}
-                placeholder="Remark"
-                onChangeText={barcodeData4 => this.setState({ barcodeData4 })}
-                value={this.state.barcodeData4}
-                keyboardType="email-address"
-                // editable={this.state.docEditable}
-                // blurOnSubmit={this.state.barcode3Focus}
-                onSubmitEditing={() => {
-                  this._focusNextField();
-                }}
-              />
-            ) : null}
-          </View>
-          <View style={styles.spaceAroundStyle}>
-            <HCheckbox
-              label={'Loc'}
-              value={this.state.locationTarget}
-              onChanged={() => this._locationChecked()}
-              toggle
+            <TextInput
+              style={(styles.barcodeInput, { flex: 1 })}
+              ref={c => {
+                this.barcode[1] = c;
+              }}
+              placeholder="Lot No"
+              onChangeText={barcodeData2 => this.setState({ barcodeData2 })}
+              value={this.state.barcodeData2}
+              keyboardType="email-address"
+              // editable={this.state.locationEditable}
+              // blurOnSubmit={this.state.barcode2Focus}
+              onSubmitEditing={() => {
+                this._focusNextField();
+              }}
             />
-            <HCheckbox label={'Loc fix'} bind={'DMS100601.fixLoc'} editable={this.state.locationTarget === 'Y'} />
-            <HCheckbox
-              label={'Doc no'}
-              value={this.state.docTarget}
-              onChanged={() => this._docChecked()}
-              editable
-              toggle
+
+            <TextInput
+              style={(styles.barcodeInput, { flex: 1 })}
+              ref={c => {
+                this.barcode[2] = c;
+              }}
+              placeholder="W/H Sacn"
+              onChangeText={barcodeData3 => this.setState({ barcodeData3 })}
+              value={this.state.barcodeData3}
+              keyboardType="email-address"
+              // editable={this.state.docEditable}
+              // blurOnSubmit={this.state.barcode3Focus}
+              onSubmitEditing={() => {
+                this._focusNextField();
+              }}
             />
-            <HCheckbox label={'Doc fix'} bind={'DMS100601.fixDoc'} editable={this.state.docTarget === 'Y'} />
-            <HCheckbox
-              label={'remark'}
-              value={this.state.remarkTarget}
-              onChanged={() => this._remarkChecked()}
-              editable
-              toggle
-            />
-            <HCheckbox label={'remark fix'} bind={'DMS100601.fixRemark'} editable={this.state.remarkTarget === 'Y'} />
+
           </View>
         </View>
         <HBaseView style={styles.container} scrollable={false}>
@@ -815,6 +576,10 @@ class Component extends NavigationScreen {
             this.state.data !== null ?
               <View style={styles.scanArea}>
                 <HRow>
+                  <HText value={` ${this.state.WH_CODE}`} textStyle={{ fontSize: 12, fontWeight: 'bold', textAlign: 'center' }} />
+                  <HText value={` ${this.state.WH_NAME}`} textStyle={{ fontSize: 12, fontWeight: 'bold', textAlign: 'center' }} />
+                </HRow>
+                <HRow>
                   <HText value={` ${this.state.VENDOR_NAME}`} textStyle={{ fontSize: 13, fontWeight: 'bold', textAlign: 'center' }} />
                 </HRow>
                 <HRow>
@@ -831,6 +596,9 @@ class Component extends NavigationScreen {
                 <HRow between>
                   <HText value={`DOC NO : ${this.state.DOC_NO}`} textStyle={{ fontSize: 12 }} />
                   <HText value={`REMARKS : ${this.state.REMARKS}`} textStyle={{ fontSize: 12 }} />
+                </HRow>
+                <HRow between>
+                  <HText value={`DETAIL DOC NO : ${this.state.DETAIL_DOC_NO}`} textStyle={{ fontSize: 12 }} />
                 </HRow>
                 <HRow between>
                   <HText value={`GR REF NO : ${this.state.GR_REF_NO}`} textStyle={{ fontSize: 12 }} />

@@ -452,7 +452,7 @@ const msgBox = ({title, msg, buttonGroup}) => {
 // type: true or false (스피너(로딩) 열람 구분)
 const openLoader = (parentId, type) => {
   const {navigator} = store.getState().global;
-  /*
+
   if (type) {
     // true : Loader 열람!
     navigator.showOverlay({
@@ -476,7 +476,7 @@ const openLoader = (parentId, type) => {
   } else {
     // false : Loader 닫힘!
     navigator.dismissOverlay(`${parentId}_common.Loader`);
-  }*/
+  }
 };
 
 const signBox = (
@@ -948,6 +948,31 @@ const openWebView = async props => {
   });
 };
 
+// 이용 약관 동의
+const TosBox = (useTermYN, personalTermYN) => {
+  const {navigator} = store.getState().global;
+
+  navigator.showOverlay({
+    component: {
+      name: 'common.TosBox',
+      passProps: {
+        useTermYN,
+        personalTermYN,
+        allTerm: useTermYN === 'Y' && personalTermYN === 'Y' ? 'Y' : 'N',
+      },
+      options: {
+        layout: {
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          componentBackgroundColor: 'rgba(0, 0, 0, 0.3)',
+        },
+        overlay: {
+          interceptTouchOutside: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   getCode,
   pivotCode,
@@ -991,4 +1016,5 @@ export default {
   dmsCheckBarcode,
   getDividedDateSet,
   openWebView,
+  TosBox,
 };

@@ -1,17 +1,17 @@
 /* *
  * Import Common
  * */
-import { View, StyleSheet } from 'react-native';
-import { React, moment, Util, ReduxStore, bluecolor } from 'libs';
-import { Component } from 'react';
+import {View, StyleSheet} from 'react-native';
+import {React, moment, Util, ReduxStore, bluecolor} from 'libs';
+import {Component} from 'react';
 /* *
  * Import node_modules
  * */
-import { LocaleConfig, Calendar as WixCalendar } from 'react-native-calendars';
+import {LocaleConfig, Calendar as WixCalendar} from 'react-native-calendars';
 import calendarStyle from 'styles/calendar';
-import { Navigation } from 'react-native-navigation';
+import {Navigation} from 'react-native-navigation';
 import Touchable from 'common/Touchable';
-import { HIcon, HText } from 'ux';
+import {HIcon, HText} from 'ux';
 
 /**
  * 달력 컴포넌트
@@ -96,19 +96,22 @@ class Calendar extends Component {
 
     // const platform = Platform.OS;
     // const contianerStyle = platform === 'ios' ? styles.containerAndroid : styles.containerIos;
-    const { navigator } = ReduxStore.getState().global;
+    const {navigator} = ReduxStore.getState().global;
 
     return (
       <View style={styles.highContainer}>
         <View style={styles.borderContainer}>
           <View style={styles.cancelBtnStyle}>
-            <HText textStyle={{ fontWeight: 'bold' }}>{this.props.label}</HText>
+            <HText textStyle={{fontWeight: 'bold'}}>{this.props.label}</HText>
             <Touchable
               onPress={() => {
                 navigator.dismissOverlay(this.props.componentId);
-              }}
-            >
-              <HIcon name="times-circle" size={20} color={bluecolor.basicGrayColor} />
+              }}>
+              <HIcon
+                name="times-circle"
+                size={20}
+                color={bluecolor.basicGrayColor}
+              />
             </Touchable>
           </View>
           <WixCalendar
@@ -117,36 +120,60 @@ class Calendar extends Component {
             onDayPress={day => {
               const currentFromDay = `${currentFromDate}`;
               const currentToDay = `${currentToDate}`;
-              const currentFromDayOrigin = currentFromDay.replace('-', '').replace('-', ''); // YYYYMMDD 형식도 추가
-              const currentToDayOrigin = currentToDay.replace('-', '').replace('-', ''); // YYYYMMDD 형식도 추가
+              const currentFromDayOrigin = currentFromDay
+                .replace('-', '')
+                .replace('-', ''); // YYYYMMDD 형식도 추가
+              const currentToDayOrigin = currentToDay
+                .replace('-', '')
+                .replace('-', ''); // YYYYMMDD 형식도 추가
               const currentDateType = `${dateType}`;
               // day.dateOrigin = day.dateString.replace('-', '').replace('-', ''); // YYYYMMDD 형식도 추가
-              Object.assign(day, { dateOrigin: day.dateString.replace('-', '').replace('-', '') });
+              Object.assign(day, {
+                dateOrigin: day.dateString.replace('-', '').replace('-', ''),
+              });
 
               // toDate가 fromDate보다 작다면 toDate를 fromDate 값으로 강제 설정!
               if (
                 currentDateType === 'toDate' &&
-                day.dateString.replace('-', '').replace('-', '') < currentFromDayOrigin
+                day.dateString.replace('-', '').replace('-', '') <
+                  currentFromDayOrigin
               ) {
-                Object.assign(day, { dateString: currentFromDay });
-                Object.assign(day, { dateOrigin: currentFromDayOrigin });
-                Object.assign(day, { year: Number(currentFromDayOrigin.substring(0, 4)) });
-                Object.assign(day, { month: Number(currentFromDayOrigin.substring(4, 6)) });
-                Object.assign(day, { day: Number(currentFromDayOrigin.substring(6, 8)) });
-                Object.assign(day, { timestamp: Number(moment(currentFromDay).format('x')) });
+                Object.assign(day, {dateString: currentFromDay});
+                Object.assign(day, {dateOrigin: currentFromDayOrigin});
+                Object.assign(day, {
+                  year: Number(currentFromDayOrigin.substring(0, 4)),
+                });
+                Object.assign(day, {
+                  month: Number(currentFromDayOrigin.substring(4, 6)),
+                });
+                Object.assign(day, {
+                  day: Number(currentFromDayOrigin.substring(6, 8)),
+                });
+                Object.assign(day, {
+                  timestamp: Number(moment(currentFromDay).format('x')),
+                });
               }
 
               // fromDate가 toDate보다 크다면 fromDate를 toDate 값으로 강제 설정!
               if (
                 currentDateType === 'fromDate' &&
-                day.dateString.replace('-', '').replace('-', '') > currentToDayOrigin
+                day.dateString.replace('-', '').replace('-', '') >
+                  currentToDayOrigin
               ) {
-                Object.assign(day, { dateString: currentToDay });
-                Object.assign(day, { dateOrigin: currentToDayOrigin });
-                Object.assign(day, { year: Number(currentToDayOrigin.substring(0, 4)) });
-                Object.assign(day, { month: Number(currentToDayOrigin.substring(4, 6)) });
-                Object.assign(day, { day: Number(currentToDayOrigin.substring(6, 8)) });
-                Object.assign(day, { timestamp: Number(moment(currentToDay).format('x')) });
+                Object.assign(day, {dateString: currentToDay});
+                Object.assign(day, {dateOrigin: currentToDayOrigin});
+                Object.assign(day, {
+                  year: Number(currentToDayOrigin.substring(0, 4)),
+                });
+                Object.assign(day, {
+                  month: Number(currentToDayOrigin.substring(4, 6)),
+                });
+                Object.assign(day, {
+                  day: Number(currentToDayOrigin.substring(6, 8)),
+                });
+                Object.assign(day, {
+                  timestamp: Number(moment(currentToDay).format('x')),
+                });
               }
 
               this.props.onChange(day);
@@ -156,7 +183,7 @@ class Calendar extends Component {
             theme={calendarStyle}
             current={`${currentData}`}
             markedDates={{
-              [`${currentData}`]: { selected: true, selectedColor: '#2c7bba' },
+              [`${currentData}`]: {selected: true, selectedColor: '#2c7bba'},
             }}
             {...this.props}
           />

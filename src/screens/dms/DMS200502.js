@@ -362,6 +362,25 @@ class Component extends NavigationScreen {
       Util.toastMsg(result.MSG);
     }
   }
+
+  // 스캔할때마다 저장 api 호출
+  async eSaveScanQty(reqList) {
+    const result = await Fetch.request('DMS030050SVC', 'grTempQtySave', {
+      body: JSON.stringify({
+        DMS030050G1: {
+          data: reqList,
+        },
+      }),
+    });
+
+    if (result.TYPE === 1) {
+      // 확정이 아닌 임시저장만 할때
+      Util.toastMsg(result.MSG);
+    } else {
+      Util.toastMsg(result.MSG);
+    }
+  }
+
   // 검수 스캔 수량 임시저장 취소 처리
   async grTempQtyCancel(confirmYN) {
     // confirm 상태이면 검수 취소 불가
@@ -429,54 +448,27 @@ class Component extends NavigationScreen {
   }
   // 바코드 스캔 처리 로직
   focusNextField(targetType, scanData) {
-    const { config } = this.props.global;
     const dataLength = this.state.data.length;
     const serialTarget = this.state.serialTarget;
 
     const dataList = this.state.data;
-    const user = this.props.global.session.USER_ID;
 
     let barcode1Data = null; // 첫번째 바코드값
-    let barcode2Data = null; // 두번째 바코드값
+    const barcode2Data = null; // 두번째 바코드값
     let currentIndex = null; // 현재 바코드스캔으로 선택된로우인덱스
     let barcodeValidYN = 'N';
 
-    if (Util.isEmpty(this.state.SCAN_USER_ID)) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: '검수 시작 버튼을 먼저 눌러주세요',
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-
-    if (this.state.SCAN_USER_ID !== user) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: `현재 ${this.state.SCAN_USER_ID}작업자가 검수진행 중에 있습니다. 기존 검수 내역을 취소한 뒤 다시 진행 해주세요`,
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-
-
+    // 아이템 - 시리얼 스캔을 하기위해 토글버튼을 클릭하여 '시리얼 스캔모드'로 변경 했을 경우
     if (serialTarget === 'Y') {
       // 1 ------------------serial 스캔 할 경우 시작 --------------------
       if (targetType === 'barcodeField') {
-        // 아이템 정보 스캔 후 시리얼 스캔 textInput으로 데이터 넘길때
+        // 아이템 정보를 스캔하여 아이템코드 내역과 일치하는지 확인
         barcode1Data = this.barcode1._lastNativeText;
         if (scanData) {
           barcode1Data = scanData;
         }
 
+        // 바코드 입력 예외 처리
         if (!barcode1Data) {
           this.setState({
             scanVaildData: '바코드를 입력해주세요',
@@ -505,97 +497,15 @@ class Component extends NavigationScreen {
 
         // 1차적으로 아이템에 대한 바코드를 찍겠지만, 아이템에 대한 데이터 유효성 뿐만 아니라
         // 로케이션 정보도 맞아야 하기 때문에 임시적으로 체크 처리
-        this._barcodeValidYN(barcodeValidYN, barcode1Data, currentIndex);
+        this._barcodeValidYN(barcodeValidYN, barcode1Data);
 
-        // 바코드 이동이 잘 되지않아서 하나 더 추가 해줌
+        // 바코드 이동이 잘 되지않아서 바코드 포커스 이동 로직 추가
         if (barcodeValidYN === 'Y') {
           this.barcode2.focus();
         }
 
-        // barcode 인덱스를 기억하기
-        this.setState({
-          currentIndex,
-        });
-
         this._sound('s');
         Vibration.vibrate(500);
-      } else {
-        //  바코드 스캔 후, 시리얼번호 스캔 했을 때
-        const index = this.state.currentIndex;
-        // 현재까지 스캔된 시리얼 내역
-        const serialScanList = dataList[index].SERIAL_NO || ''; // 현재바코드에서 스캔한 시리얼들
-        const savedScanStr = dataList[index].SAVED_SERIAL_NO || ''; // 백단에서 가져온 시리얼들
-
-        // let savedScanList = null;
-        barcode1Data = this.state.barcodeData1;
-        barcode2Data = this.barcode2._lastNativeText;
-        if (scanData) {
-          barcode2Data = scanData;
-        }
-
-        // serialScanQty.push(barcode2Data);
-        // 백단에 전달 주는 형태
-        if (serialScanList !== '' && barcode2Data.length !== dataList[index].SERIAL_LENGTH) {
-          // 아이템 별 시리얼길이를 체크하여 아이템의 시리얼 길이가 상이할 시 알람 메세지 표출
-          Util.msgBox({
-            title: 'Alert',
-            msg: '시리얼번호를 확인해주세요',
-            buttonGroup: [
-              {
-                title: 'OK',
-              },
-            ],
-          });
-          Vibration.vibrate(2000);
-          this._sound('f');
-          this._onClearBarcode('barcode2');
-          this.barcode2.focus();
-          return;
-        }
-
-        // 중복값 확인
-        let checkserialScanList = '';
-        if (savedScanStr.length > 0) {
-          checkserialScanList = `${serialScanList},${savedScanStr}`;
-        } else {
-          checkserialScanList = serialScanList;
-        }
-        const duplicateIndex = checkserialScanList.indexOf(barcode2Data);
-
-
-        if (duplicateIndex > -1) {
-          Util.msgBox({
-            title: 'Notice.',
-            msg: '기존에 입력된 시리얼 번호입니다. 확인해주세요.',
-            buttonGroup: [
-              {
-                title: 'OK',
-                onPress: () => {
-                  this._onClearBarcode('barcode2');
-                },
-              },
-            ],
-          });
-          this._sound('f');
-          Vibration.vibrate(2000);
-          return;
-        }
-
-        if (Util.isEmpty(dataList[index].SERIAL_NO)) {
-          dataList[index].SERIAL_NO = `${barcode2Data}`;
-          dataList[index].SERIAL_LENGTH = barcode2Data.length;
-        } else {
-          dataList[index].SERIAL_NO = `${serialScanList},${barcode2Data}`;
-        }
-        dataList[index].SERIAL_CNT += 1;
-
-        Vibration.vibrate(500);
-        this._sound('s');
-
-        // dataList[index].serialLenght = barcode2Data.length;
-        this.setState({
-          data: dataList,
-        });
       }
     } // 1 ------------------serial 스캔 할 경우 끝 --------------------
     // 바코드 번호 스캔했는지 확인 필요.
@@ -604,15 +514,16 @@ class Component extends NavigationScreen {
       Vibration.vibrate(500);
 
       let barcodeYN = 'N';
-      const scanCnt = Number(this.state.successCnt);
+      let scanCnt = Number(this.state.successCnt);
       let g1ScanData = null;
       let targetG1ScanData = null;
-      let SCAN_QTY = 0;
-      let TOTAL_QTY = 0;
+      let SCAN_QTY = 0; // 스캔한 아이템 개수
+      let TOTAL_QTY = 0; // 총아이템개수
 
 
       if (serialTarget === 'N') {
         barcode1Data = this.barcode1._lastNativeText;
+
         if (scanData) {
           barcode1Data = scanData;
         }
@@ -631,10 +542,25 @@ class Component extends NavigationScreen {
         }
       }
 
+      // 입고 등록시 시리얼을 등록한 경우,
+      if (!Util.isEmpty(this.state.data[0].SAVED_SERIAL_NO) && targetType !== 'barcodeField') {
+        barcode1Data = this.barcode2._lastNativeText;
+        if (scanData) {
+          barcode1Data = scanData;
+        }
+      }
+
       for (let i = 0; i < dataLength; i += 1) {
         // 아이템마스터의 바코드로 스캔
-        // 바코드 체크로직 추가 필요 JKM
-        g1ScanData = this.state.data[i].BARCODE.toUpperCase().trim();
+        // 시리얼이 백단에서 입력된 경우 시리얼과 list 내역 매칭
+        if (this.state.data[0].SAVED_SERIAL_NO.length > 0 && targetType !== 'barcodeField') {
+          g1ScanData = this.state.data[i].SAVED_SERIAL_NO.toUpperCase().trim();
+        } else {
+          // 시리얼이 백단에서 입력된 경우 아이템 list 내역 매칭
+          g1ScanData = this.state.data[i].BARCODE.toUpperCase().trim();
+        }
+
+        // if (barcode1Data.toUpperCase().trim() === g1ScanData)
         if (barcode1Data.toUpperCase().trim() === g1ScanData) {
           if (Util.isEmpty(dataList[i].completed)) {
             currentIndex = i;
@@ -658,6 +584,7 @@ class Component extends NavigationScreen {
         // 스트링 값으로 오는 경우
         SCAN_QTY = parseInt(SCAN_QTY, 10);
         SCAN_QTY += 1;
+        scanCnt += 1;
         dataList[currentIndex].SCAN_QTY = SCAN_QTY;
         targetG1ScanData = this.state.data[currentIndex].BARCODE.trim();
         if (TOTAL_QTY === SCAN_QTY) {
@@ -671,13 +598,14 @@ class Component extends NavigationScreen {
           dataList[currentIndex].completed = 'Y';
           this._setScanValidData('s');
           this.barcode1.focus();
-          // this._sound('s');
+          this.onSave('every');
         } else {
           this.setState({
             scanVaildData: `"${targetG1ScanData}" (${SCAN_QTY}/${TOTAL_QTY}) 수량이 일치하지 않습니다.`,
             barcodeScanData: barcode1Data,
             barcodeScanIndex: currentIndex,
             data: dataList,
+            successCnt: scanCnt,
           });
           if (TOTAL_QTY < SCAN_QTY) {
             this._sound('f');
@@ -685,11 +613,9 @@ class Component extends NavigationScreen {
             return;
           }
           this._setScanValidData('f');
-          // this._sound('s');
         }
-        this.getTotalCheckItemQty();
+        // this.getTotalCheckItemQty();
         this.barcode1.focus();
-        Keyboard.dismiss(); // 키보드 닫기!
       } else {
         // 스캔 실패한 경우
         this.setState({
@@ -697,7 +623,6 @@ class Component extends NavigationScreen {
           barcodeScanData: null,
           barcodeScanIndex: currentIndex,
           successCnt: 0,
-          goRow: 0,
         });
         this._setScanValidData('f');
         this._sound('f');
@@ -714,10 +639,6 @@ class Component extends NavigationScreen {
     }
   }
 
-
-  _keyboardDismiss() {
-    Keyboard.dismiss();
-  }
   tts(message) {
     if (this.props.global.config.CTM_TTS_YN !== 'Y') {
       return;
@@ -755,34 +676,8 @@ class Component extends NavigationScreen {
       });
     }
   }
-  _clear(item) {
-    const user = this.props.global.session.USER_ID;
-    if (Util.isEmpty(this.state.SCAN_USER_ID)) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: '검수 시작 버튼을 먼저 눌러주세요',
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-    if (this.state.SCAN_USER_ID !== user) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: `현재 ${this.state.SCAN_USER_ID}작업자가 검수진행 중에 있습니다. 기존 검수 내역을 취소한 뒤 다시 진행 해주세요`,
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-    console.log(item);
-    this._keyboardDismiss();
+  _clear() {
+    Keyboard.dismiss();
     this.barcode1.clear();
     this.setState({
       barcodeData1: null,
@@ -793,6 +688,7 @@ class Component extends NavigationScreen {
     });
     this.fetch(null);
   }
+
   onBarcodePopup() {
     const { navigator } = this.props;
     Navigation(
@@ -804,6 +700,7 @@ class Component extends NavigationScreen {
       'Barcode Scan',
     );
   }
+
   onBarcodeScan(result) {
     if (this.state.barcodeData1) {
       this.focusNextField('serialField', result);
@@ -812,87 +709,11 @@ class Component extends NavigationScreen {
     }
   }
 
-  onSync() {
-    const user = this.props.global.session.USER_ID;
-    if (Util.isEmpty(this.state.SCAN_USER_ID)) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: '검수 시작 버튼을 먼저 눌러주세요',
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-    if (this.state.SCAN_USER_ID !== user) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: `현재 ${this.state.SCAN_USER_ID}작업자가 검수진행 중에 있습니다. 기존 검수 내역을 취소한 뒤 다시 진행 해주세요`,
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-    if (this.state.barcodeScanIndex === null) {
-      this.setState({
-        scanVaildData: '바코드를 입력해주세요',
-      });
-      this.scanVaildData.setNativeProps({
-        style: styles.textVaildScanFailure,
-      });
-      this._sound('f');
-      Vibration.vibrate(2000);
-      return;
-    }
-    const dataList = this.state.data;
-    dataList[this.state.barcodeScanIndex].scanChecked = 'Y';
-    const ITEM_QTY = dataList[this.state.barcodeScanIndex].ITEM_QTY;
-    dataList[this.state.barcodeScanIndex].SCAN_QTY = ITEM_QTY;
-    const targetG1ScanData = dataList[this.state.barcodeScanIndex].BARCODE.trim();
-    this.setState({
-      scanVaildData: `"${targetG1ScanData}" (${ITEM_QTY} / ${ITEM_QTY}) 수량 수정 성공`,
-      data: dataList,
-    });
-    this.getTotalCheckItemQty();
-    this._setScanValidData('s');
-    // this._sound('s');
-  }
   // 전체 카운팅
   _onCheckPress(item, index) {
-    const user = this.props.global.session.USER_ID;
     const data = this.state.data;
     const setScanQty = item.ITEM_QTY;
-    const completed = item.completed;
 
-    if (Util.isEmpty(this.state.SCAN_USER_ID)) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: '검수 시작 버튼을 먼저 눌러주세요',
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-    if (this.state.SCAN_USER_ID !== user) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: `현재 ${this.state.SCAN_USER_ID}작업자가 검수진행 중에 있습니다. 기존 검수 내역을 취소한 뒤 다시 진행 해주세요`,
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
     if (item.SCAN_QTY === item.ITEM_QTY) {
       data.forEach(x => {
         if (x === item) {
@@ -923,32 +744,7 @@ class Component extends NavigationScreen {
   }
   // 매뉴얼로 카운팅
   _onCountPress(item, index) {
-    const user = this.props.global.session.USER_ID;
     const data = this.state.data;
-    if (Util.isEmpty(this.state.SCAN_USER_ID)) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: '검수 시작 버튼을 먼저 눌러주세요',
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-    if (this.state.SCAN_USER_ID !== user) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: `현재 ${this.state.SCAN_USER_ID}작업자가 검수진행 중에 있습니다. 기존 검수 내역을 취소한 뒤 다시 진행 해주세요`,
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
     // const totalData = this.state.totalData;
     let setScanQty = item.SCAN_QTY || 0;
     setScanQty += 1;
@@ -1036,44 +832,13 @@ class Component extends NavigationScreen {
     }
   }
 
-  // vibrationPattern(result) {
-  // if (result === false) {
-  // for (let i = 0; i < 5; i += 1) {
-  // setTimeout(() => { Vibration.vibrate(1000); }, 1000);
-  // }
-  // }
-  // }
+
   // 출고 스캔 수량 저장
   async onSave(status, title, confirmYN) {
     const dataList = this.state.data;
     const dataLength = this.state.data.length;
     const reqList = [];
-    const msg = null;
-    const user = this.props.global.session.USER_ID;
-    if (Util.isEmpty(this.state.SCAN_USER_ID)) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: '검수 시작 버튼을 먼저 눌러주세요',
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
-    if (this.state.SCAN_USER_ID !== user) {
-      Util.msgBox({
-        title: 'Alert',
-        msg: `현재 ${this.state.SCAN_USER_ID}작업자가 검수진행 중에 있습니다. 확인 후 다시 진행 해주세요`,
-        buttonGroup: [
-          {
-            title: 'OK',
-          },
-        ],
-      });
-      return;
-    }
+
     for (let i = 0; i < dataLength; i += 1) {
       if (dataList[i].scanChecked) {
         if (dataList[i].scanChecked === 'Y') {
@@ -1090,50 +855,49 @@ class Component extends NavigationScreen {
       return;
     }
 
-    // 임시저장 취소일때 status 값 넘어옴
-    if (!Util.isEmpty(status)) {
-      Util.msgBox({
-        title,
-        msg: '현재 검수 상태를 취소 하시겠습니까?',
-        buttonGroup: [
-          {
-            title: 'OK',
-            onPress: () => this.grTempQtyCancel(),
-          },
-        ],
-      });
-    } else {
-      Util.msgBox({
-        title,
-        msg: '현재 검수 상태를 저장 하시겠습니까?',
-        buttonGroup: [
-          {
-            title: 'OK',
-            onPress: () => this.saveScanQty(reqList, confirmYN),
-          },
-        ],
-      });
+    // 확정일떄
+    if (!Util.isEmpty(confirmYN) && confirmYN === 'confirmY') {
+      this.grTempQtyCancel(confirmYN);
+      return;
     }
+
+    // 상시 임시저장일떄
+    if (status === 'every') {
+      this.eSaveScanQty(reqList);
+    }
+
+    // 상시 임시저장일떄
+    // if (status === 'temp') {
+    //   this.SaveScanQty(reqList, confirmYN);
+    // }
   }
+
   _serialCheckAlert() {
+    Keyboard.dismiss(); // 키보드 닫기!
     Util.msgBox({
       title: 'Alert',
       msg: '스캔 모드를 변경 하시겠습니까?',
       buttonGroup: [
         {
           title: '스캔 모드 변경',
-          onPress: () => this._serialChecked(),
+          onPress: () => this._changeSerialMode('changeSerialMode'),
         },
         {
           title: '스캔 모드 변경 취소',
+          onPress: () => this._changeSerialMode('cancleSerialMode'),
         },
       ],
     });
   }
 
+  // 아이템바코드 단건검수 vs (아이템바코드-시리얼) 검수진행모드 선택
+  _changeSerialMode(param) {
+    if (param === 'changeSerialMode') {
+      this.setState({ serialTarget: 'Y' });
+    } else {
+      this.setState({ serialTarget: 'N' });
+    }
 
-  _serialChecked() {
-    this.setState({ serialTarget: this.state.serialTarget === 'Y' ? 'N' : 'Y' });
     this._resetState();
     this.barcode1.focus();
   }
@@ -1157,10 +921,10 @@ class Component extends NavigationScreen {
   }
 
   // 첫번째 바코드 유효검사
-  _barcodeValidYN(barcodeValidYN, barcode1Data, currentIndex) {
+  _barcodeValidYN(barcodeValidYN, barcode1Data) {
     if (barcodeValidYN === 'Y') {
       this.setState({
-        scanVaildData: null,
+        scanVaildData: `${barcode1Data} 스캔 완료`,
         barcodeData1: barcode1Data,
         locationEditable: true,
       });
@@ -1179,11 +943,6 @@ class Component extends NavigationScreen {
       this._sound('f');
       Vibration.vibrate(2000);
     }
-
-
-    // if (this.state.data.every((data) => data.ITEM_QTY !== data.SCAN_QTY)) {
-    //   this.state.data[currentIndex].scanChecked !== 'N';
-    // }
   }
 
   _onClearBarcode(barcodeType) {
@@ -1265,15 +1024,6 @@ class Component extends NavigationScreen {
         <View style={styles.buttonStyle}>
           <HButton onPress={() => this._clear()} name={'refresh'} />
         </View>
-        <View style={styles.buttonStyle}>
-          <HButton
-            bStyle={{
-              backgroundColor: bluecolor.basicGreenColor,
-            }}
-            onPress={() => this.onSync()}
-            name={'key'}
-          />
-        </View>
       </View>
     );
   }
@@ -1302,7 +1052,7 @@ renderBody = (item, index, scanData, scanIndex) => (
           }}
         />
         <HText
-          value={item.ITEM_NAME}
+          value={item.SAVED_SERIAL_NO}
           textStyle={{
             color: bluecolor.basicBlueImpactColor,
             fontWeight: 'bold',
@@ -1371,17 +1121,10 @@ renderBody = (item, index, scanData, scanIndex) => (
 render() {
   const buttonGroup = [
     {
-      title: '임시저장 취소', // 필수사항
-      iconName: 'save', // 필수사항 // FontAwesome
-      onPress: (title, param) => {
-        this.onSave('cancel', '현재상태 취소');
-      },
-    },
-    {
       title: '임시저장', // 필수사항
       iconName: 'save', // 필수사항 // FontAwesome
       onPress: (title, param) => {
-        this.onSave(null, '현재상태 저장');
+        this.onSave('temp', '현재상태 저장');
       },
     },
     {
@@ -1425,75 +1168,45 @@ render() {
       </Text>
       <HRow between style={styles.countStyle}>
         {
-          Util.isEmpty(this.state.SCAN_USER_ID) ? (
-            <HButton
-              onPress={() => { this.grScanUserSave(); }}
-              title={' 검수 시작'}
-              name={'play'}
-              bStyle={{
-                width: 120,
-                paddingRight: 2,
-                backgroundColor: bluecolor.basicRedColor,
-              }}
-            />
-          ) : (
-            <HButton
-              onPress={() => { this.grScanUserCansel('cancle'); }}
-              title={'검수 취소'}
-              name={'stop'}
-              bStyle={{
-                width: 120,
-                paddingRight: 2,
-                backgroundColor: bluecolor.basicDeepGrayColor,
-              }}
-            />
-          )
-        }
-        <View style={styles.spaceAroundStyle}>
-          {
-            this.props.params.GR_STATUS === 'F' ? (
-              <HText
-                style={{ marginTop: 10 }}
-                textStyle={[
-                  this.state.totalCheckItemQty !== this.state.totalItemQty
-                    ? { color: bluecolor.basicRedColor, fontWeight: 'bold', fontSize: 20 }
-                    : { color: bluecolor.basicGreenColor, fontWeight: 'bold', fontSize: 20 },
-                ]}
-              >
-                {this.state.totalItemQty} / {this.state.totalItemQty}
-              </HText>
-            ) :
-              <HText
-                style={{ marginTop: 10 }}
-                textStyle={[
-                  this.state.totalCheckItemQty !== this.state.totalItemQty
-                    ? { color: bluecolor.basicRedColor, fontWeight: 'bold', fontSize: 20 }
-                    : { color: bluecolor.basicGreenColor, fontWeight: 'bold', fontSize: 20 },
-                ]}
-              >
-                {this.state.totalCheckItemQty} / {this.state.totalItemQty}
-              </HText>
-          }
-          {this.state.itemEditable ?
-            <Touchable
-              style={{ width: 40, height: 40, backgroundColor: 'rgba(52,152,219,0.8)', borderRadius: 40 }}
-              underlayColor={'rgba(63,119,161,0.8)'}
-              onPress={() => this.onBarcodePopup()}
+          this.props.params.GR_STATUS === 'F' ? (
+            <HText
+              style={{ marginTop: 10 }}
+              textStyle={[
+                this.state.totalCheckItemQty !== this.state.totalItemQty
+                  ? { color: bluecolor.basicRedColor, fontWeight: 'bold', fontSize: 20 }
+                  : { color: bluecolor.basicGreenColor, fontWeight: 'bold', fontSize: 20 },
+              ]}
             >
-              <HIcon
-                name="barcode"
-                size={15}
-                color="#fff"
-                style={{ alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: 6 }}
-              />
-            </Touchable> : null
-          }
-
-        </View>
-
-
+              {this.state.totalItemQty} / {this.state.totalItemQty}
+            </HText>
+          ) :
+            <HText
+              style={{ marginTop: 10 }}
+              textStyle={[
+                this.state.totalCheckItemQty !== this.state.totalItemQty
+                  ? { color: bluecolor.basicRedColor, fontWeight: 'bold', fontSize: 20 }
+                  : { color: bluecolor.basicGreenColor, fontWeight: 'bold', fontSize: 20 },
+              ]}
+            >
+              {this.state.totalCheckItemQty} / {this.state.totalItemQty}
+            </HText>
+        }
+        {this.state.itemEditable ?
+          <Touchable
+            style={{ width: 40, height: 40, backgroundColor: 'rgba(52,152,219,0.8)', borderRadius: 40 }}
+            underlayColor={'rgba(63,119,161,0.8)'}
+            onPress={() => this.onBarcodePopup()}
+          >
+            <HIcon
+              name="barcode"
+              size={15}
+              color="#fff"
+              style={{ alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 6 }}
+            />
+          </Touchable> : null
+        }
       </HRow>
       <HListView
         keyExtractor={item => item.GR_NO + item.GR_SEQ_NO}
