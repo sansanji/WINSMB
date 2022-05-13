@@ -24,6 +24,7 @@
     "clean-android": "cd android && ./gradlew clean",
     "apk": "adb -d install --abi armeabi-v7a ./android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk",
     "apk64": "adb -d install --abi arm64-v8a ./android/app/build/outputs/apk/release/app-arm64-v8a-release.apk",
+    "apkold": "adb -d install ./android/app/build/outputs/apk/release/app-release.apk",
     "jsdoc": "./node_modules/.bin/jsdoc -c jsdoc.json"
   },
   "dependencies": {

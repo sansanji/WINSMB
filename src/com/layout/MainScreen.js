@@ -79,49 +79,45 @@ class Component extends NavigationScreen {
     });
     let homeScreen = 'screen.ADM010106';
 
-    if (this.state.USER_AUTH === null) {
-      if (props.global.session.USER_AUTH) {
-        // 하나로일때..
-        if (props.global.session.COMPANY_CODE.indexOf('HTNS') > -1) {
-          // 기사용 메뉴 특화
-          if (props.global.session.USER_AUTH === 'D') {
-            homeScreen = 'screen.TMS100701';
-          } else {
-            // 하나로회사일경우 wins mode 활성화
-            AsyncStorage.getItem('saveWINS', (err, result) => {
-              if (result === 'Y') {
-                initSettingsWins();
-                app([
-                  {
-                    title: 'WINS',
-                    swidget: 'WVWINS',
-                    screen: 'com.layout.MainScreenWins',
-                  },
-                ]);
-              }
-            });
-          }
-        } else {
-          // 타업체일때
-          // eslint-disable-next-line no-lonely-if
-          if (props.global.session.USER_AUTH === 'D') {
-            homeScreen = 'screen.TMS100801';
-          } else {
-            homeScreen = 'screen.TMS100803';
-          }
-        }
-        app([
-          {
-            title: '홈으로',
-            screen: homeScreen,
-          },
-        ]);
+    // if (this.state.USER_AUTH === null) {
+    //   if (props.global.session.USER_AUTH) {
+    //     // 하나로일때..
+    //     if (props.global.session.COMPANY_CODE.indexOf('HTNS') > -1) {
+    //       // 기사용 메뉴 특화
+    //       if (props.global.session.USER_AUTH === 'D') {
+    //         homeScreen = 'screen.TMS100701';
+    //       } else {
+    //       // 하나로회사일경우 wins mode 활성화
+    //         AsyncStorage.getItem('saveWINS', (err, result) => {
+    //           if (result === 'Y') {
+    //             initSettingsWins();
+    //             app([{
+    //               title: 'WINS',
+    //               swidget: 'WVWINS',
+    //               screen: 'com.layout.MainScreenWins',
+    //             }]);
+    //           }
+    //         });
+    //       }
+    //     } else {
+    //       // 타업체일때
+    //       // eslint-disable-next-line no-lonely-if
+    //       if (props.global.session.USER_AUTH === 'D') {
+    //         homeScreen = 'screen.TMS100801';
+    //       } else {
+    //         homeScreen = 'screen.TMS100803';
+    //       }
+    //     }
+    //     app([{
+    //       title: '홈으로',
+    //       screen: homeScreen,
+    //     }]);
 
-        this.setState({
-          USER_AUTH: props.global.session.USER_AUTH,
-        });
-      }
-    }
+    //     this.setState({
+    //       USER_AUTH: props.global.session.USER_AUTH,
+    //     });
+    //   }
+    // }
   }
 
   componentDidMount() {
