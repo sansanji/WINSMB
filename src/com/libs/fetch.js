@@ -634,7 +634,6 @@ const fetchCommonCode = async (groupCode, SQL) => {
 
 // VTX010101SVC/appUserToken';
 const updatePushToken = async mobileToken => {
-  debugger;
   const result = await request('VTX010101SVC', 'appUserToken', {
     body: JSON.stringify({
       APP_ID: 'G1MB',
