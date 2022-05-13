@@ -180,8 +180,8 @@ class Component extends NavigationScreen {
           source={{
             uri: `${fetchURL}/api/file/getDownload/${this.props.global.session.COMPANY_CODE}/MB/${item.PHOTO_VALUE}`,
             headers: {
-              'X-CSRF-TOKEN': GLOBAL.gToken,
-              Cookie: GLOBAL.gCookie,
+              'X-CSRF-TOKEN': globalThis.gToken,
+              Cookie: globalThis.gCookie,
               // withCredentials: true,
             },
           }}
