@@ -9,12 +9,12 @@ import modelUtil from 'libs/modelUtil';
 /* *
  * Import node_modules
  * */
-import FCM, {
-  FCMEvent,
-  RemoteNotificationResult,
-  WillPresentNotificationResult,
-  NotificationType,
-} from 'react-native-fcm';
+// import FCM, {
+//   FCMEvent,
+//   RemoteNotificationResult,
+//   WillPresentNotificationResult,
+//   NotificationType,
+// } from 'react-native-fcm';
 import Cookie from 'react-native-cookie';
 import RNBeep from 'react-native-a-beep';
 

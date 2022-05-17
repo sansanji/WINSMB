@@ -1,4 +1,4 @@
-import { Navigation } from 'react-native-navigation';
+import {Navigation} from 'react-native-navigation';
 // this will start our app
 const loginCheck = type => {
   // 처음 화면 오픈시에는 registerAppLaunchedListener 가 필요

@@ -5,35 +5,42 @@
  * Copyright (c) 2016 react-native-component <moonsunfall@aliyun.com>
  */
 
-import React, { Component } from 'react';
-import { View, requireNativeComponent, NativeModules, AppState, Platform } from 'react-native';
+import React, {Component} from 'react';
+import {
+  View,
+  requireNativeComponent,
+  NativeModules,
+  AppState,
+  Platform,
+} from 'react-native';
 
-const BarcodeManager = Platform.OS == 'ios' ? NativeModules.Barcode : NativeModules.CaptureModule;
+const BarcodeManager =
+  Platform.OS == 'ios' ? NativeModules.Barcode : NativeModules.CaptureModule;
 
 class Barcode extends Component {
   static defaultProps = {
     barCodeTypes:
       Platform.OS == 'ios'
-        ? Object.values(BarcodeManager.barCodeTypes)
+        ? null
         : [
-          'AZTEC',
-          'CODABAR',
-          'CODE_39',
-          'CODE_93',
-          'CODE_128',
-          'DATA_MATRIX',
-          'EAN_8',
-          'EAN_13',
-          'ITF',
-          'MAXICODE',
-          'PDF_417',
-          'QR_CODE',
-          'RSS_14',
-          'RSS_EXPANDED',
-          'UPC_A',
-          'UPC_E',
-          'UPC_EAN_EXTENSION',
-        ],
+            'AZTEC',
+            'CODABAR',
+            'CODE_39',
+            'CODE_93',
+            'CODE_128',
+            'DATA_MATRIX',
+            'EAN_8',
+            'EAN_13',
+            'ITF',
+            'MAXICODE',
+            'PDF_417',
+            'QR_CODE',
+            'RSS_14',
+            'RSS_EXPANDED',
+            'UPC_A',
+            'UPC_E',
+            'UPC_EAN_EXTENSION',
+          ],
     scannerRectWidth: 255,
     scannerRectHeight: 70,
     scannerRectTop: 0,
