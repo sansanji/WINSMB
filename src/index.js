@@ -1,7 +1,7 @@
-import { PermissionsAndroid, Platform, AsyncStorage, Alert } from 'react-native';
-import { Provider } from 'react-redux';
+import {PermissionsAndroid, Platform, AsyncStorage, Alert} from 'react-native';
+import {Provider} from 'react-redux';
 import ReduxStore from 'libs/store';
-import { registerScreens } from 'src/routes';
+import {registerScreens} from 'src/routes';
 import logincheck from './loginCheck';
 // registerScreenVisibilityListener();
 console.disableYellowBox = true;
@@ -34,7 +34,7 @@ function checkPermission() {
       Alert.alert(
         'Please, Check Permissions!',
         message,
-        [{ text: 'OK', onPress: () => checkPermission() }, { cancelable: false }],
+        [{text: 'OK', onPress: () => checkPermission()}, {cancelable: false}],
         {
           cancelable: false,
         },

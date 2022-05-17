@@ -28,6 +28,7 @@
     "jsdoc": "./node_modules/.bin/jsdoc -c jsdoc.json"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.17.4",
     "@react-native-community/viewpager": "^5.0.11",
     "create-react-class": "^15.7.0",
     "deprecated-react-native-listview": "0.0.7",
@@ -47,7 +48,6 @@
     "react-native-cookie": "^0.3.0",
     "react-native-document-picker": "^6.0.4",
     "react-native-elements": "^3.4.2",
-    "react-native-fcm": "^16.2.4",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-gifted-chat": "^0.16.3",
     "react-native-gps": "^0.1.1",

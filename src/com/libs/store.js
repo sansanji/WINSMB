@@ -1,4 +1,4 @@
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import {createStore, applyMiddleware, combineReducers} from 'redux';
 import thunk from 'redux-thunk';
 import logger from 'redux-logger';
 import globalReducers from 'reducers/globalReducers';
@@ -7,12 +7,13 @@ import chatReducers from 'reducers/chatReducers';
 // import mapReducers from 'reducers/mapReducers';
 import modelReducers from 'reducers/modelReducers';
 
-import { persistStore, persistCombineReducers, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/es/storage'; // default: localStorage if web, AsyncStorage if react-native
+import {persistStore, persistReducer} from 'redux-persist';
+// import storage from 'redux-persist/es/storage'; // default: localStorage if web, AsyncStorage if react-native
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const globalPersistConfig = {
   key: 'global',
-  storage,
+  storage: AsyncStorage,
   // blacklist: [], // 저장하기 싫은 키들
   whitelist: [
     'token',
@@ -31,14 +32,14 @@ const globalPersistConfig = {
 
 const chatPersistConfig = {
   key: 'chat',
-  storage,
+  storage: AsyncStorage,
   blacklist: [], // 저장하기 싫은 키들
   whitelist: ['messages', 'newalarm'],
 };
 
 const modelPersistConfig = {
   key: 'model',
-  storage,
+  storage: AsyncStorage,
   blacklist: ['data'], // 저장하기 싫은 키들
   whitelist: [],
 };
