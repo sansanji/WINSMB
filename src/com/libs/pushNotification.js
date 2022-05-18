@@ -42,7 +42,6 @@ export const initPushNotification = () => {
     this.newalarm = '1';
     this.message = '1';
     this.title = null;
-    debugger;
     if (Platform.OS === 'ios') {
       this.title = notif.aps.alert.title;
     } else {

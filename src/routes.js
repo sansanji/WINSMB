@@ -13,7 +13,6 @@ import dms from 'screens/dms';
 import cbt from 'screens/cbt';
 
 export function registerScreens(store, Provider) {
-  debugger;
   layout(store, Provider);
   common(store, Provider);
   adm(store, Provider);

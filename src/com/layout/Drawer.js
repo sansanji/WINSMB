@@ -98,19 +98,22 @@ class Drawer extends React.Component {
 
   render() {
     const {session, lmenu, activeTab} = this.props.global;
+    const platform = Platform.OS;
     let profileIcon = '';
     const profileSource = _.get(this.props.global, 'session.PHOTO_PATH', null);
     if (profileSource) {
       profileIcon = {
-        uri: profileSource,
-        headers: {
-          'X-CSRF-TOKEN': globalThis.gToken,
-          Cookie: globalThis.gCookie,
-          // withCredentials: true,
-        },
+        uri:
+          platform === 'ios'
+            ? 'https' + profileSource.substr(4)
+            : profileSource,
+        // headers: {
+        //   'X-CSRF-TOKEN': globalThis.gToken,
+        //   Cookie: globalThis.gCookie,
+        //   // withCredentials: true,
+        // },
       };
     }
-    const platform = Platform.OS;
     const parentContainer =
       platform !== 'ios' ? styles.containerAndroid : styles.containerIos;
 

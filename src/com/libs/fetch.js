@@ -515,7 +515,6 @@ const loginHttps = async (csrf, id, password) => {
     });
     // Util.toastMsg('resToken :::: '+response.headers.get('set-cookie').toString())
     // console.log('response :::: ', response.headers.get('set-cookie').toString())
-    debugger;
     await AsyncStorage.setItem(
       'cookie',
       response.headers.get('set-cookie').toString(),
