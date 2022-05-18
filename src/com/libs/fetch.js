@@ -10,7 +10,7 @@ import env from 'libs/env';
  * */
 import Cookie from 'react-native-cookie';
 import loginScreen from 'src/login';
-import pinch from 'react-native-pinch';
+// import pinch from 'react-native-pinch';
 
 const envConfig = env();
 const fetchURL = envConfig.fetchURL;
@@ -321,7 +321,7 @@ const requestHttps = async (code, method, config, toastYN, dissKeyboard) => {
 
     // Keyboard.dismiss(); // 키보드 닫기!
     Cookie.clear();
-    const response = await pinch.fetch(`${fetchURL}/api/${code}/${method}`, {
+    const response = await fetch(`${fetchURL}/api/${code}/${method}`, {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': globalThis.gToken,
@@ -390,7 +390,7 @@ const requestApicallHttps = async (
       Keyboard.dismiss(); // 키보드 닫기!
     }
     Cookie.clear();
-    const response = await pinch.fetch(`${fetchURL}/api/${code}/${method}`, {
+    const response = await fetch(`${fetchURL}/api/${code}/${method}`, {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': globalThis.gToken,
@@ -456,7 +456,7 @@ const tokenHttps = async () => {
     // 거짓 데이터를 토큰을 발급받기 위해 보낸다.
     // 제대로 처리가 이루어져도 아래와 같은 에러를 발생한다.
     // Invalid CSRF Token 'Global No1 HTNS' was found on …quest parameter '_csrf' or header 'X-CSRF-TOKEN'.
-    const response = await pinch.fetch(`${fetchURL}/htns_sec`, {
+    const response = await fetch(`${fetchURL}/htns_sec`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -497,28 +497,32 @@ const loginHttps = async (csrf, id, password) => {
     password,
   )}&_spring_security_remember_me=${false}`;
   try {
-    const response = await pinch.fetch(`${fetchURL}/htns_sec`, {
+    const response = await fetch(`${fetchURL}/htns_sec`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
         'X-CSRF-TOKEN': csrf,
-        AJAX: 'true',
-        Cookie: globalThis.gCookie || '', // ios 토근 오류로 인해 주석처리!
+        AJAX: true,
+        Cookie: globalThis.gCookie, // ios 토근 오류로 인해 주석처리!
         'User-Agent': 'okhttp/3.4.1',
         credentials: 'omit',
       },
       body: sBody,
+      sslPinning: {
+        cert: 'mycert', // cert file name without the `.cer`
+      },
     });
+    // Util.toastMsg('resToken :::: '+response.headers.get('set-cookie').toString())
+    // console.log('response :::: ', response.headers.get('set-cookie').toString())
+    debugger;
     await AsyncStorage.setItem(
       'cookie',
-      response.headers['Set-Cookie'].toString(),
+      response.headers.get('set-cookie').toString(),
     );
     // NOTE: DEBUG
     const responseJson = await response.json();
-    console.log('login', response, responseJson);
     const resCookie = await _.get(responseJson, 'SetCookie');
-
     // 이상하게 response 헤더 cookie값이 짤려서 강제로 넣음 로컬 환경에서는 넣지 않는다.
     if (
       resCookie &&
@@ -531,10 +535,25 @@ const loginHttps = async (csrf, id, password) => {
     await AsyncStorage.setItem('token', resToken);
 
     globalThis.gToken = resToken;
-    globalThis.gCookie = response.headers['Set-Cookie'].toString();
+    globalThis.gCookie = response.headers.get('set-cookie').toString();
+
     // globalThis.gCookie = resCookie;
-    console.log(`JAY FINAL TOKEN = ${globalThis.gToken}`);
-    console.log(`JAY FINAL COOKIE = ${globalThis.gCookie}`);
+    if (
+      globalThis.gCookie.indexOf('JSESSIONID') < 0 &&
+      responseJson.sessionId
+    ) {
+      globalThis.gCookie =
+        'X-CSRF-TOKEN=' +
+        globalThis.gToken +
+        '; Path=/;JSESSIONID=' +
+        responseJson.sessionId.substr(
+          responseJson.sessionId.indexOf('SessionId: ') + 11,
+        ) +
+        '; Path=/; ' +
+        globalThis.gCookie;
+      await AsyncStorage.setItem('cookie', globalThis.gCookie);
+    }
+
     return responseJson;
   } catch (error) {
     Alert.alert(
@@ -552,7 +571,7 @@ const loginHttps = async (csrf, id, password) => {
 const logoutHttps = async () => {
   console.log('fetch-log', 'logout', `${fetchURL}/j_spring_security_logout`);
   try {
-    const response = await pinch.fetch(`${fetchURL}/j_spring_security_logout`, {
+    const response = await fetch(`${fetchURL}/j_spring_security_logout`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',

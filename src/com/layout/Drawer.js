@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   containerIos: {
     flex: 1,
     height: '100%',
-    width: '75%',
+    width: '100%',
     backgroundColor: '#0e4d92',
     borderRadius: 5,
   },

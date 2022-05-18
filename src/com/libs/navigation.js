@@ -122,6 +122,7 @@ this.openNavi = async (navigator, code, passProps, title) => {
             name: code,
             passProps,
             options: {
+              modalPresentationStyle: 'overCurrentContext',
               topBar: {
                 elevation: 0,
                 visible: true,
