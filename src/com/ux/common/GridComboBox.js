@@ -1,18 +1,18 @@
 /* *
  * Import Common
  * */
-import { View, StyleSheet, Dimensions, KeyboardAvoidingView } from 'react-native';
-import { React, _, bluecolor, modelUtil, Fetch, Util, ReduxStore } from 'libs';
+import {View, StyleSheet, Dimensions, KeyboardAvoidingView} from 'react-native';
+import {React, _, bluecolor, modelUtil, Fetch, Util, ReduxStore} from 'libs';
 import Touchable from 'common/Touchable';
 import HListView from 'components/List/HListView';
 import HTextfield from 'components/Form/Text/HTextfield';
 import HFormView from 'components/View/HFormView';
-import { HIcon, HText } from 'ux';
+import {HIcon, HText} from 'ux';
 /**
  * 그리드 콤보박스 컴포넌트
  */
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
 /**
  * 공통코드를 활용한 그리드 콤보박스 컴포넌트
@@ -43,7 +43,10 @@ class GridComboBox extends React.Component {
     const searchWord = modelUtil.getModelData('GRIDCOMBOBOX');
     Object.assign(query, searchWord);
 
-    const result = await Fetch.fetchCommonCode(this.props.groupCode, searchWord);
+    const result = await Fetch.fetchCommonCode(
+      this.props.groupCode,
+      searchWord,
+    );
 
     this.setState({
       data: result.data,
@@ -55,7 +58,7 @@ class GridComboBox extends React.Component {
   }
 
   _onPress(item, index) {
-    const { navigator } = ReduxStore.getState().global;
+    const {navigator} = ReduxStore.getState().global;
     navigator.dismissOverlay(this.props.componentId);
     this.props.onChange(this.state.data[index]);
   }
@@ -82,20 +85,33 @@ class GridComboBox extends React.Component {
 
   renderBody = (item, index) => (
     <Touchable
-      style={{ flex: 1 }}
+      style={{flex: 1}}
       activeOpacity={0.7}
       key={item[this.props.codeField]}
-      onPress={() => this._onPress(item, index)}
-    >
+      onPress={() => this._onPress(item, index)}>
       <HFormView style={styles.bodyStyle}>
-        <HTextfield
-          label={Util.getMultiText(this.props.codeField)}
+        <HText
+          value={Util.getMultiText(this.props.codeField)}
+          textStyle={{
+            color: bluecolor.basicBlueImpactColor,
+            fontSize: 10,
+          }}
+        />
+        <HText
           value={item[this.props.codeField]}
           // textStyle={{
           //   color: bluecolor.basicBlueImpactColor,
           // }}
         />
-        <HTextfield
+        <HText
+          value={Util.getMultiText(this.props.nameField)}
+          textStyle={{
+            marginTop: 5,
+            color: bluecolor.basicBlueImpactColor,
+            fontSize: 10,
+          }}
+        />
+        <HText
           label={Util.getMultiText(this.props.nameField)}
           value={item[this.props.nameField]}
           // textStyle={{
@@ -107,27 +123,33 @@ class GridComboBox extends React.Component {
   );
 
   render() {
-    const { navigator } = ReduxStore.getState().global;
+    const {navigator} = ReduxStore.getState().global;
 
     return (
-      <KeyboardAvoidingView style={styles.highContainer} behavior="height" enabled={false}>
+      <KeyboardAvoidingView
+        style={styles.highContainer}
+        behavior="height"
+        enabled={false}>
         <View style={styles.highContainer}>
           <View style={styles.container}>
             <View style={styles.cancelBtnStyle}>
-              <HText textStyle={{ fontWeight: 'bold' }}>{this.props.label}</HText>
+              <HText textStyle={{fontWeight: 'bold'}}>{this.props.label}</HText>
               <Touchable
                 onPress={() => {
                   navigator.dismissOverlay(this.props.componentId);
-                }}
-              >
-                <HIcon name="times-circle" size={20} color={bluecolor.basicGrayColor} />
+                }}>
+                <HIcon
+                  name="times-circle"
+                  size={20}
+                  color={bluecolor.basicGrayColor}
+                />
               </Touchable>
             </View>
             <HListView
               keyExtractor={item => item[this.props.codeField]}
               headerClose={false}
               renderHeader={this.renderHeader}
-              renderItem={({ item, index }) => this.renderBody(item, index)}
+              renderItem={({item, index}) => this.renderBody(item, index)}
               onSearch={() => this.fetchCombo()}
               onMoreView={null}
               // 그려진값

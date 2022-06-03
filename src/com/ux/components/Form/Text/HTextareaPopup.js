@@ -86,64 +86,42 @@ class HTextareaPopup extends React.Component {
     }
     return (
       <View>
-        <Touchable onPress={() => this._onPress()}>
-          <TextField
-            value={' '}
-            labelFontSize={bluecolor.basicFontSizeS}
-            fontSize={bluecolor.basicFontSize}
-            containerStyle={styles.containerStyle}
-            activeLineWidth={1}
-            labelHeight={20}
-            inputContainerPadding={0}
-            inputContainerStyle={{height: this.state.height}}
-            textColor={bluecolor.basicBlueFontColor}
-            style={bold ? {fontWeight: 'bold'} : null}
-            lineWidth={0}
-            labelTextStyle={bold ? {fontWeight: 'bold'} : null}
-            {...this.props}
-            editable={false}
-            baseColor={
-              editabled ? bluecolor.basicBluebt : bluecolor.basicDeepGrayColor
-            }
-            multiline
-            blurOnSubmit={false}
-            allowFontScaling={false}
-          />
-          <TextInput
-            multiline
-            editable={false}
-            numberOfLines={this.props.numberOfLines}
+        <TextField
+          value={this.state.textValue}
+          labelFontSize={bluecolor.basicFontSizeS}
+          fontSize={bluecolor.basicFontSize}
+          containerStyle={styles.containerStyle}
+          activeLineWidth={1}
+          labelHeight={20}
+          inputContainerPadding={0}
+          inputContainerStyle={{height: this.state.height}}
+          textColor={bluecolor.basicBlueFontColor}
+          style={bold ? {fontWeight: 'bold'} : null}
+          lineWidth={0}
+          labelTextStyle={bold ? {fontWeight: 'bold'} : null}
+          {...this.props}
+          editable={this.editabled}
+          baseColor={
+            editabled ? bluecolor.basicBluebt : bluecolor.basicDeepGrayColor
+          }
+          multiline
+          blurOnSubmit={false}
+          allowFontScaling={false}
+          showSoftInputOnFocus={false}
+          onFocus={() => this._onPress()}
+        />
+        {requireCheck ? (
+          <Text
             style={{
-              borderWidth: 0,
-              height: '100%',
-              width: '100%',
+              color: 'red',
+              fontSize: 10,
               position: 'absolute',
-              top: 0,
+              top: 8,
               left: 0,
-              backgroundColor: bluecolor.basicTrans,
-              padding: 0,
-              marginTop: 20,
-              marginLeft: 5,
-              fontSize: bluecolor.basicFontSize,
-              color: bluecolor.basicBlueFontColor,
-              // fontWeight: 'bold',
-              textAlignVertical: 'top',
-            }}
-            value={this.state.textValue}
-          />
-          {requireCheck ? (
-            <Text
-              style={{
-                color: 'red',
-                fontSize: 10,
-                position: 'absolute',
-                top: 8,
-                left: 0,
-              }}>
-              *
-            </Text>
-          ) : null}
-        </Touchable>
+            }}>
+            *
+          </Text>
+        ) : null}
       </View>
     );
   }

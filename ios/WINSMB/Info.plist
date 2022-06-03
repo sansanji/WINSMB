@@ -46,8 +46,22 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>$(PRODUCT_NAME) would like access to your bluetooth?  Your bluetooth is used to check temperature sensor.  당신의 블루투스는 온도센서를 체크하기 위해 쓰일 것 입니다.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>$(PRODUCT_NAME) would like access to your bluetooth?  Your bluetooth is used to check temperature sensor.  당신의 블루투스는 온도센서를 체크하기 위해 쓰일 것 입니다.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>$(PRODUCT_NAME) would like to use your camera? Your camera is used to share shipment's photo 당신의 카메라는 화물사진 공유에 쓰일 것 입니다. </string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>$(PRODUCT_NAME) For location tracking and calculating cost of delivery. 화물위치추적과 거리계산시 필요 </string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>$(PRODUCT_NAME) would like to use your microphone? Your microphone is used to order to AI chatbot 당신의 마이크는 챗봇명령을 위해 쓰일 것 입니다.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>$(PRODUCT_NAME) would like to save photos to your photo gallery? Your photo gallery is used to share shipment photo.  당신의 사진갤러리는 화물사진 공유에 쓰일 것 입니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>$(PRODUCT_NAME) would like access to your photo gallery?  Your photo gallery is used to share shipment photo.  당신의 사진갤러리는 화물사진 공유에 쓰일 것 입니다.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>$(PRODUCT_NAME) would like access to your speech recognition?  Your speech recognition is used to listen your speech for ordering AI chatbot.  당신의 음성인식은 챗봇이 당신의 명령을 듣기위해 쓰일 것 입니다.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

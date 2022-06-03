@@ -91,32 +91,31 @@ class HCombobox extends React.Component {
 
     return (
       <View>
-        <Touchable onPress={() => this._onPress()}>
-          <TextField
-            {...this.props}
-            label={`${label}▼`}
-            labelFontSize={bluecolor.basicFontSizeS}
-            fontSize={bluecolor.basicFontSize}
-            containerStyle={styles.containerStyle}
-            activeLineWidth={1}
-            labelHeight={20}
-            inputContainerPadding={0}
-            inputContainerStyle={{height}}
-            textColor={bluecolor.basicBlueFontColor}
-            style={bold ? {fontWeight: 'bold'} : null}
-            // onChangeText={text => {}}
-            lineWidth={0}
-            value={String(value || modelUtil.getValue(this.bindname))}
-            editable={false}
-            labelTextStyle={bold ? {fontWeight: 'bold'} : null}
-            baseColor={
-              this.editable
-                ? bluecolor.basicBluebt
-                : bluecolor.basicDeepGrayColor
-            }
-            allowFontScaling={false}
-          />
-        </Touchable>
+        <TextField
+          {...this.props}
+          label={`${label}▼`}
+          labelFontSize={bluecolor.basicFontSizeS}
+          fontSize={bluecolor.basicFontSize}
+          containerStyle={styles.containerStyle}
+          activeLineWidth={1}
+          labelHeight={20}
+          inputContainerPadding={0}
+          inputContainerStyle={{height}}
+          textColor={bluecolor.basicBlueFontColor}
+          style={bold ? {fontWeight: 'bold'} : null}
+          // onChangeText={text => {}}
+          lineWidth={0}
+          value={String(value || modelUtil.getValue(this.bindname))}
+          editable={this.editable}
+          labelTextStyle={bold ? {fontWeight: 'bold'} : null}
+          baseColor={
+            this.editable ? bluecolor.basicBluebt : bluecolor.basicDeepGrayColor
+          }
+          allowFontScaling={false}
+          showSoftInputOnFocus={false}
+          onFocus={() => this._onPress()}
+        />
+
         {requireCheck ? (
           <Text
             style={{

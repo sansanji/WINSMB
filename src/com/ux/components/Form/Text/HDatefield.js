@@ -82,55 +82,52 @@ class HDatefield extends React.Component {
     return (
       <View>
         <View>
-          <Touchable onPress={() => this._onPress()}>
-            <TextField
-              {...this.props}
-              label={label}
-              labelFontSize={bluecolor.basicFontSizeS}
-              fontSize={bluecolor.basicFontSize}
-              containerStyle={styles.containerStyle}
-              activeLineWidth={1}
-              labelHeight={20}
-              inputContainerPadding={0}
-              keyboardType={'numeric'}
-              inputContainerStyle={{height}}
-              textColor={bluecolor.basicBlueFontColor}
-              style={bold ? {fontWeight: 'bold'} : null}
-              // onChangeText={text => {}}
-              lineWidth={0}
-              value={Util.formatDate(
-                value || modelUtil.getValue(bind),
-                dateNum,
-              )}
-              editable={false}
-              labelTextStyle={bold ? {fontWeight: 'bold'} : null}
-              baseColor={
-                this.editable
-                  ? bluecolor.basicBluebt
-                  : bluecolor.basicDeepGrayColor
-              }
-              allowFontScaling={false}
+          <TextField
+            {...this.props}
+            label={label}
+            labelFontSize={bluecolor.basicFontSizeS}
+            fontSize={bluecolor.basicFontSize}
+            containerStyle={styles.containerStyle}
+            activeLineWidth={1}
+            labelHeight={20}
+            inputContainerPadding={0}
+            keyboardType={'numeric'}
+            inputContainerStyle={{height}}
+            textColor={bluecolor.basicBlueFontColor}
+            style={bold ? {fontWeight: 'bold'} : null}
+            // onChangeText={text => {}}
+            lineWidth={0}
+            value={Util.formatDate(value || modelUtil.getValue(bind), dateNum)}
+            editable={this.editable}
+            labelTextStyle={bold ? {fontWeight: 'bold'} : null}
+            baseColor={
+              this.editable
+                ? bluecolor.basicBluebt
+                : bluecolor.basicDeepGrayColor
+            }
+            allowFontScaling={false}
+            showSoftInputOnFocus={false}
+            onFocus={() => this._onPress()}
+          />
+          <View style={styles.iconStyle}>
+            <FontAwesome
+              name="calendar"
+              size={12}
+              color={bluecolor.basicBlueColor}
             />
-            <View style={styles.iconStyle}>
-              <FontAwesome
-                name="calendar"
-                size={12}
-                color={bluecolor.basicBlueColor}
-              />
-            </View>
-            {requireCheck ? (
-              <Text
-                style={{
-                  color: 'red',
-                  fontSize: 10,
-                  position: 'absolute',
-                  top: 7,
-                  left: 0,
-                }}>
-                *
-              </Text>
-            ) : null}
-          </Touchable>
+          </View>
+          {requireCheck ? (
+            <Text
+              style={{
+                color: 'red',
+                fontSize: 10,
+                position: 'absolute',
+                top: 7,
+                left: 0,
+              }}>
+              *
+            </Text>
+          ) : null}
         </View>
       </View>
     );

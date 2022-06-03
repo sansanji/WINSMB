@@ -1,8 +1,8 @@
 /* *
  * Import Common
  * */
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { React, bluecolor, KeepAwake } from 'libs';
+import {View, StyleSheet, ScrollView} from 'react-native';
+import {React, bluecolor, KeepAwake} from 'libs';
 import Spinner from 'common/Spinner';
 import Touchable from 'common/Touchable';
 import BackImage from 'common/BackImage.js';
@@ -33,7 +33,8 @@ class HBaseView extends React.Component {
 
   render() {
     let Base = ScrollView;
-    const { scrollable, style, backimage, spinner, children, keepAwake } = this.props;
+    const {scrollable, style, backimage, spinner, children, keepAwake} =
+      this.props;
     if (scrollable === false) {
       Base = View;
     }
@@ -52,8 +53,7 @@ class HBaseView extends React.Component {
           <Touchable
             style={styles.searchButton}
             underlayColor={bluecolor.basicBlueColorTrans}
-            onPress={() => this.props.button()}
-          >
+            onPress={() => this.props.button()}>
             <HIcon name={'search'} color={bluecolor.basicWhiteColor} />
           </Touchable>
         ) : null}
@@ -62,7 +62,7 @@ class HBaseView extends React.Component {
             position={'right'}
             elevation={1} // 화면에 가장 위에 표시!
             zIndex={1} // 화면에 가장 위에 표시!
-            style={{ overflow: 'visible' }}
+            style={{overflow: 'visible'}}
             // bgColor={bluecolor.basicBlueLightTrans}
           >
             {this.props.buttonGroup.map(buttonGroupItem => (
@@ -71,10 +71,15 @@ class HBaseView extends React.Component {
                 buttonColor={bluecolor.basicBluelightColor}
                 title={buttonGroupItem.title}
                 onPress={() =>
-                  buttonGroupItem.onPress(buttonGroupItem.title, buttonGroupItem.param)
-                }
-              >
-                <HIcon name={buttonGroupItem.iconName} color={bluecolor.basicWhiteColor} />
+                  buttonGroupItem.onPress(
+                    buttonGroupItem.title,
+                    buttonGroupItem.param,
+                  )
+                }>
+                <HIcon
+                  name={buttonGroupItem.iconName}
+                  color={bluecolor.basicWhiteColor}
+                />
               </ActionButton.Item>
             ))}
           </ActionButton>

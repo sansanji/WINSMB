@@ -12,10 +12,7 @@ target 'WINSMB' do
     :hermes_enabled => false
   )
 
-  target 'WINSMBTests' do
-    inherit! :complete
-    # Pods for testing
-  end
+  pod 'react-native-camera', path: '../node_modules/react-native-camera'
 
   # Enables Flipper.
   #

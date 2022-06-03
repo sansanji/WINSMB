@@ -1,7 +1,7 @@
 /* *
  * Import Common
  * */
-import { View, Text, Linking } from 'react-native';
+import {View, Text, Linking} from 'react-native';
 import {
   React,
   Redux,
@@ -39,7 +39,6 @@ import {
 /**
  * 샘플 폼
  */
-
 
 // import Barcode from 'com/layout/Barcode';
 
@@ -96,13 +95,13 @@ class Component extends NavigationScreen {
     });
     // 모델에 데이터를 set해주면 모델을 쓸수 있다.
     modelUtil.setModelData('TEMPFORM', result.FMS010108F1);
-    this.setState({ data: result.FMS010108F1 });
+    this.setState({data: result.FMS010108F1});
     Util.openLoader(this.screenId, false);
   }
 
   // 바코드 팝업
   onBarcodePopup() {
-    const { navigator } = this.props;
+    const {navigator} = this.props;
     Navigation(
       navigator,
       'com.layout.ComBarcode',
@@ -160,7 +159,8 @@ class Component extends NavigationScreen {
   }
 
   onNaverMapp() {
-    const url = 'nmap://route/car?slat=37.3595953&slng=127.1053971&sname=%EA%B7%B8%EB%A6%B0%ED%8C%A9%ED%86%A0%EB%A6%AC&secoords=37.359761,127.10527&dlng=127.1267772&dlat=37.4200267&dname=%EC%84%B1%EB%82%A8%EC%8B%9C%EC%B2%AD&decoords=37.4189564,127.1256827&v1lng=126.9522394&v1lat=37.464007&v1name=%20%EC%84%9C%EC%9A%B8%EB%8C%80%ED%95%99%EA%B5%90&v1ecoords=37.466358,126.948357&appname=com.example.myappcom.hanarotns.g1mb';
+    const url =
+      'nmap://route/car?slat=37.3595953&slng=127.1053971&sname=%EA%B7%B8%EB%A6%B0%ED%8C%A9%ED%86%A0%EB%A6%AC&secoords=37.359761,127.10527&dlng=127.1267772&dlat=37.4200267&dname=%EC%84%B1%EB%82%A8%EC%8B%9C%EC%B2%AD&decoords=37.4189564,127.1256827&v1lng=126.9522394&v1lat=37.464007&v1name=%20%EC%84%9C%EC%9A%B8%EB%8C%80%ED%95%99%EA%B5%90&v1ecoords=37.466358,126.948357&appname=com.example.myappcom.hanarotns.g1mb';
     Linking.openURL(url);
   }
 
@@ -178,7 +178,7 @@ class Component extends NavigationScreen {
       onMessage: () => {
         console.log('TEMPFORM ON MESSAGE');
       },
-      onLoad: (e) => {
+      onLoad: e => {
         console.log('TEMPFORM ON LOAD', e);
       },
     });
@@ -189,8 +189,7 @@ class Component extends NavigationScreen {
       <HBaseView
         // spinner={this.state.spinner}
         keepAwake // 화면 꺼짐 방지! 사용할 경우만 선언하자! (지도화면 등...)
-        button={() => this.fetch(this.state.keyword)}
-      >
+        button={() => this.fetch(this.state.keyword)}>
         {/* HbaseView를 상속 받는 화면의 경우는 HbaseView의 속성값으로 지정하고,
          * 그외의 건들은 최상위 부모 <View> </View> 안에 <KeepAwake /> 설정한다.
          * libs 공동 선언부에 처리 */}
@@ -221,34 +220,68 @@ class Component extends NavigationScreen {
           <HTextfield label={'HBL No.'} bind={'TEMPFORM.HBL_NO'} />
         </HRow>
         <HTexttitle>Shipper</HTexttitle>
-        <HTextfield label={langUtil.get(this, 'ANAME')} bind={'TEMPFORM.SHIPPER_NAME'} />
-        <HTextarea label={'Address'} bind={'TEMPFORM.SHIPPER_ADDR2'} numberOfLines={2} />
+        <HTextfield
+          label={langUtil.get(this, 'ANAME')}
+          bind={'TEMPFORM.SHIPPER_NAME'}
+        />
+        <HTextarea
+          label={'Address'}
+          bind={'TEMPFORM.SHIPPER_ADDR2'}
+          numberOfLines={2}
+        />
         <HRow>
           <HTextfield label={'Tel.'} bind={'TEMPFORM.SHIPPER_TEL'} />
           <HTextfield label={'Fax.'} bind={'TEMPFORM.SHIPPER_FAX'} />
         </HRow>
         <HTexttitle>Consignee</HTexttitle>
-        <HTextfield label={langUtil.get(this, 'ANAME')} bind={'TEMPFORM.CONSIGNEE_NAME'} />
-        <HTextarea label={'Address'} bind={'TEMPFORM.CONSIGNEE_ADDR2'} numberOfLines={2} />
+        <HTextfield
+          label={langUtil.get(this, 'ANAME')}
+          bind={'TEMPFORM.CONSIGNEE_NAME'}
+        />
+        <HTextarea
+          label={'Address'}
+          bind={'TEMPFORM.CONSIGNEE_ADDR2'}
+          numberOfLines={2}
+        />
         <HRow>
           <HTextfield label={'Tel.'} bind={'TEMPFORM.CONSIGNEE_TEL'} />
           <HTextfield label={'Fax.'} bind={'TEMPFORM.CONSIGNEE_FAX'} editable />
         </HRow>
         <HTexttitle>Notify</HTexttitle>
-        <HTextfield label={langUtil.get(this, 'ANAME')} bind={'TEMPFORM.NOTIFY_NAME'} />
-        <HTextarea label={'Address'} bind={'TEMPFORM.NOTIFY_ADDR2'} numberOfLines={2} />
+        <HTextfield
+          label={langUtil.get(this, 'ANAME')}
+          bind={'TEMPFORM.NOTIFY_NAME'}
+        />
+        <HTextarea
+          label={'Address'}
+          bind={'TEMPFORM.NOTIFY_ADDR2'}
+          numberOfLines={2}
+        />
         <HRow>
           <HTextfield label={'Tel.'} bind={'TEMPFORM.NOTIFY_TEL'} />
-          <HTextfield label={'Fax.'} bind={'TEMPFORM.NOTIFY_FAX'} editable require />
+          <HTextfield
+            label={'Fax.'}
+            bind={'TEMPFORM.NOTIFY_FAX'}
+            editable
+            require
+          />
         </HRow>
         <HTexttitle>HDatefield</HTexttitle>
         <HRow>
-          <HDatefield label={'ETD'} bind={'TEMPFORM.ETD_DATE'} editable require />
+          <HDatefield
+            label={'ETD'}
+            bind={'TEMPFORM.ETD_DATE'}
+            editable
+            require
+          />
           <HDatefield label={'ETA'} value={this.state.data.ETA_DATE} />
         </HRow>
         <HRow>
           <HTextfield label={'Depart'} bind={'TEMPFORM.DEPART_PORT_NAME'} />
-          <HTextfield label={'Arrival'} value={this.state.data.ARRIVAL_PORT_NAME} />
+          <HTextfield
+            label={'Arrival'}
+            value={this.state.data.ARRIVAL_PORT_NAME}
+          />
         </HRow>
         <HTexttitle>HNumberfield</HTexttitle>
         <HRow>
@@ -311,7 +344,10 @@ class Component extends NavigationScreen {
             />
             <HCombobox
               label={'Yes/No'}
-              groupJson={[{ DT_CODE: 'Y', LOC_VALUE: 'Yes' }, { DT_CODE: 'N', LOC_VALUE: 'No' }]}
+              groupJson={[
+                {DT_CODE: 'Y', LOC_VALUE: 'Yes'},
+                {DT_CODE: 'N', LOC_VALUE: 'No'},
+              ]}
               bindVar={{
                 CD: 'TEMPFORM.YES_NO',
                 NM: 'TEMPFORM.YES_NO_NAME',
@@ -332,7 +368,7 @@ class Component extends NavigationScreen {
               CD: 'TEMPFORM.DEPART_PORT',
               NM: 'TEMPFORM.DEPART_PORT_NAME',
             }}
-            sql={{ DT_CODE: '' }}
+            sql={{DT_CODE: ''}}
             editable
             require
           />
@@ -343,23 +379,51 @@ class Component extends NavigationScreen {
               CD: 'TEMPFORM.DEPART_PORT',
               NM: 'TEMPFORM.DEPART_PORT_NAME',
             }}
-            sql={{ DT_CODE: '' }}
+            sql={{DT_CODE: ''}}
             value={this.state.data.ARRIVAL_PORT_NAME}
           />
         </HRow>
         <HTexttitle>HCheckbox</HTexttitle>
         <HRow>
-          <HCheckbox label={'Forward'} bind={'TEMPFORM.FORWARDING_YN'} editable />
+          <HCheckbox
+            label={'Forward'}
+            bind={'TEMPFORM.FORWARDING_YN'}
+            editable
+          />
           <HCheckbox label={'Customs'} bind={'TEMPFORM.CUSTOMS_YN'} editable />
-          <HCheckbox label={'Trans'} bind={'TEMPFORM.TRANS_YN'} editable require />
+          <HCheckbox
+            label={'Trans'}
+            bind={'TEMPFORM.TRANS_YN'}
+            editable
+            require
+          />
           <HCheckbox label={'Warehouse'} bind={'TEMPFORM.WAREHOUSE_YN'} />
           <HCheckbox label={'Bonded'} value={'Y'} />
         </HRow>
         <HRow>
-          <HCheckbox label={'Forward'} bind={'TEMPFORM.FORWARDING_YN'} editable toggle />
-          <HCheckbox label={'Customs'} bind={'TEMPFORM.CUSTOMS_YN'} editable toggle />
-          <HCheckbox label={'Trans'} bind={'TEMPFORM.TRANS_YN'} editable toggle />
-          <HCheckbox label={'Warehouse'} bind={'TEMPFORM.WAREHOUSE_YN'} toggle />
+          <HCheckbox
+            label={'Forward'}
+            bind={'TEMPFORM.FORWARDING_YN'}
+            editable
+            toggle
+          />
+          <HCheckbox
+            label={'Customs'}
+            bind={'TEMPFORM.CUSTOMS_YN'}
+            editable
+            toggle
+          />
+          <HCheckbox
+            label={'Trans'}
+            bind={'TEMPFORM.TRANS_YN'}
+            editable
+            toggle
+          />
+          <HCheckbox
+            label={'Warehouse'}
+            bind={'TEMPFORM.WAREHOUSE_YN'}
+            toggle
+          />
           <HCheckbox label={'Bonded'} value={'Y'} />
         </HRow>
         <HTexttitle>HTextarea</HTexttitle>
@@ -562,32 +626,36 @@ class Component extends NavigationScreen {
           />
         </HRow>
         <HTexttitle>HChart</HTexttitle>
-        <View style={{ flex: 1, marginTop: 10 }}>
+        <View style={{flex: 1, marginTop: 10}}>
           <HChart
             customValueRenderer={(index, point) => {
-              if (index % 2 === 0) return null;
-              return <Text style={{ textAlign: 'center', margin: 0 }}>{point.y}</Text>;
+              if (index % 2 === 0) {
+                return null;
+              }
+              return (
+                <Text style={{textAlign: 'center', margin: 0}}>{point.y}</Text>
+              );
             }}
             data={[
               {
                 seriesName: 'series1',
                 data: [
-                  { x: '2018-02-01', y: 30 },
-                  { x: '2018-02-02', y: 200 },
-                  { x: '2018-02-03', y: 170 },
-                  { x: '2018-02-04', y: 250 },
-                  { x: '2018-02-05', y: 10 },
+                  {x: '2018-02-01', y: 30},
+                  {x: '2018-02-02', y: 200},
+                  {x: '2018-02-03', y: 170},
+                  {x: '2018-02-04', y: 250},
+                  {x: '2018-02-05', y: 10},
                 ],
                 color: bluecolor.basicBlueColor,
               },
               {
                 seriesName: 'series2',
                 data: [
-                  { x: '2018-02-01', y: 20 },
-                  { x: '2018-02-02', y: 100 },
-                  { x: '2018-02-03', y: 140 },
-                  { x: '2018-02-04', y: 550 },
-                  { x: '2018-02-05', y: 40 },
+                  {x: '2018-02-01', y: 20},
+                  {x: '2018-02-02', y: 100},
+                  {x: '2018-02-03', y: 140},
+                  {x: '2018-02-04', y: 550},
+                  {x: '2018-02-05', y: 40},
                 ],
                 color: bluecolor.basicRedColor,
               },
@@ -596,29 +664,31 @@ class Component extends NavigationScreen {
             height={150}
           />
         </View>
-        <View style={{ flex: 1, marginTop: 10 }}>
+        <View style={{flex: 1, marginTop: 10}}>
           <HChart
-            customValueRenderer={(index, point) => <Text style={{ margin: 0 }}>{point.y}</Text>}
+            customValueRenderer={(index, point) => (
+              <Text style={{margin: 0}}>{point.y}</Text>
+            )}
             data={[
               {
                 seriesName: 'series1',
                 data: [
-                  { x: '2018-02-01', y: 30 },
-                  { x: '2018-02-02', y: 200 },
-                  { x: '2018-02-03', y: 170 },
-                  { x: '2018-02-04', y: 250 },
-                  { x: '2018-02-05', y: 10 },
+                  {x: '2018-02-01', y: 30},
+                  {x: '2018-02-02', y: 200},
+                  {x: '2018-02-03', y: 170},
+                  {x: '2018-02-04', y: 250},
+                  {x: '2018-02-05', y: 10},
                 ],
                 color: bluecolor.basicBlueColor,
               },
               {
                 seriesName: 'series2',
                 data: [
-                  { x: '2018-02-01', y: 20 },
-                  { x: '2018-02-02', y: 100 },
-                  { x: '2018-02-03', y: 140 },
-                  { x: '2018-02-04', y: 550 },
-                  { x: '2018-02-05', y: 40 },
+                  {x: '2018-02-01', y: 20},
+                  {x: '2018-02-02', y: 100},
+                  {x: '2018-02-03', y: 140},
+                  {x: '2018-02-04', y: 550},
+                  {x: '2018-02-05', y: 40},
                 ],
                 color: bluecolor.basicRedColor,
               },
@@ -649,32 +719,92 @@ class Component extends NavigationScreen {
         />
         <HTexttitle>Beacon</HTexttitle>
         <HRow>
-          <HButton onPress={() => beaconUtil.startBeacon()} name={'rss'} title={'Start'} />
-          <HButton onPress={() => beaconUtil.stopBeacon()} name={'times-circle-o'} title={'Stop'} />
+          <HButton
+            onPress={() => beaconUtil.startBeacon()}
+            name={'rss'}
+            title={'Start'}
+          />
+          <HButton
+            onPress={() => beaconUtil.stopBeacon()}
+            name={'times-circle-o'}
+            title={'Stop'}
+          />
         </HRow>
         <HTexttitle>Barcode</HTexttitle>
-        <HButton onPress={() => this.onBarcodePopup()} name={'barcode'} title={'Barcode'} />
+        <HButton
+          onPress={() => this.onBarcodePopup()}
+          name={'barcode'}
+          title={'Barcode'}
+        />
         <HTexttitle>signBox</HTexttitle>
-        <HButton onPress={() => this.onSignBoxPopup()} name={'paint-brush'} title={'Sign'} />
+        <HButton
+          onPress={() => this.onSignBoxPopup()}
+          name={'paint-brush'}
+          title={'Sign'}
+        />
         <HTexttitle>barcodeBox</HTexttitle>
-        <HButton onPress={() => this.onBarcodeBoxPopup()} name={'paint-brush'} title={'Create Barcode'} />
+        <HButton
+          onPress={() => this.onBarcodeBoxPopup()}
+          name={'paint-brush'}
+          title={'Create Barcode'}
+        />
         <HTexttitle>imageBox</HTexttitle>
-        <HButton onPress={() => this.onImageBoxPopup()} name={'image'} title={'Image'} />
+        <HButton
+          onPress={() => this.onImageBoxPopup()}
+          name={'image'}
+          title={'Image'}
+        />
         <HTexttitle>naverMap</HTexttitle>
-        <HButton onPress={() => this.onNaverMapp()} name={'map'} title={'Naver'} />
+        <HButton
+          onPress={() => this.onNaverMapp()}
+          name={'map'}
+          title={'Naver'}
+        />
         <HTexttitle>webView</HTexttitle>
-        <HButton onPress={() => this.openWebViewLogin()} name={'monitor'} title={'Webivew Login'} />
-        <HButton onPress={() => this.openWebView()} name={'monitor'} title={'Webivew'} />
+        <HButton
+          onPress={() => this.openWebViewLogin()}
+          name={'monitor'}
+          title={'Webivew Login'}
+        />
+        <HButton
+          onPress={() => this.openWebView()}
+          name={'monitor'}
+          title={'Webivew'}
+        />
         <HTexttitle>TosBox</HTexttitle>
-        <HButton onPress={() => this.onTosBoxPopup()} name={'paint-brush'} title={'Tos Box'} />
+        <HButton
+          onPress={() => this.onTosBoxPopup()}
+          name={'paint-brush'}
+          title={'Tos Box'}
+        />
         <HTexttitle>Timeline</HTexttitle>
         <Timeline
           data={[
-            { time: '12/02\n09:00', title: 'Start', description: 'Event 1 Description' },
-            { time: '12/02\n10:45', title: 'Event 2', description: 'Event 2 Description' },
-            { time: '12/02\n12:00', title: 'Event 3', description: 'Event 3 Description' },
-            { time: '12/02\n14:00', title: 'Event 4', description: 'Event 4 Description' },
-            { time: '12/02\n16:30', title: 'Goal', description: 'Event 5 Description' },
+            {
+              time: '12/02\n09:00',
+              title: 'Start',
+              description: 'Event 1 Description',
+            },
+            {
+              time: '12/02\n10:45',
+              title: 'Event 2',
+              description: 'Event 2 Description',
+            },
+            {
+              time: '12/02\n12:00',
+              title: 'Event 3',
+              description: 'Event 3 Description',
+            },
+            {
+              time: '12/02\n14:00',
+              title: 'Event 4',
+              description: 'Event 4 Description',
+            },
+            {
+              time: '12/02\n16:30',
+              title: 'Goal',
+              description: 'Event 5 Description',
+            },
           ]}
           circleSize={20}
           onEventPress={data => {
@@ -682,7 +812,7 @@ class Component extends NavigationScreen {
           }}
           circleColor={bluecolor.basicBlueColor}
           lineColor={bluecolor.basicBlueColor}
-          timeContainerStyle={{ minWidth: 52, marginTop: -5 }}
+          timeContainerStyle={{minWidth: 52, marginTop: -5}}
           titleStyle={{
             color: bluecolor.basicBlueColor,
           }}
@@ -693,13 +823,12 @@ class Component extends NavigationScreen {
             padding: 5,
             borderRadius: 20,
           }}
-          descriptionStyle={{ color: 'gray' }}
+          descriptionStyle={{color: 'gray'}}
           options={{
-            style: { paddingTop: 5 },
+            style: {paddingTop: 5},
           }}
           innerCircle={'dot'}
         />
-
       </HBaseView>
     );
   }
@@ -707,7 +836,7 @@ class Component extends NavigationScreen {
 /**
  * Inject redux actions and props
  */
-const mapStateToProps = state => ({ global: state.global, model: state.model });
+const mapStateToProps = state => ({global: state.global, model: state.model});
 
 /**
  * Wrapping with root component

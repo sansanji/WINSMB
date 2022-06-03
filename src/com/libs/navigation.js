@@ -120,9 +120,11 @@ this.openNavi = async (navigator, code, passProps, title) => {
         {
           component: {
             name: code,
+            color: 'white',
             passProps,
             options: {
-              modalPresentationStyle: 'overCurrentContext',
+              color: 'white',
+              // modalPresentationStyle: 'overCurrentContext',
               topBar: {
                 elevation: 0,
                 visible: true,
