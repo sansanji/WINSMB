@@ -124,9 +124,9 @@ class Component extends NavigationScreen {
     }
   }
 
-  componentDidMount() {
-    // initPushNotification();
-    // connectPushNotificationListeners();
+  async componentDidMount() {
+    await initPushNotification();
+    connectPushNotificationListeners();
   }
 
   async componentWillMount() {

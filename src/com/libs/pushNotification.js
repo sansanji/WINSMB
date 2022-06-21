@@ -17,36 +17,37 @@ import modelUtil from 'libs/modelUtil';
 // } from 'react-native-fcm';
 import Cookie from 'react-native-cookie';
 import RNBeep from 'react-native-a-beep';
+import messaging from '@react-native-firebase/messaging';
 
 /**
  * 푸쉬메세지 관련 라이브러리
  */
 
-export const initPushNotification = () => {
-  FCM.requestPermissions()
-    .then(() => console.log('granted'))
-    .catch(() => console.log('notification permission rejected'));
+export const initPushNotification = async () => {
+  // if (
+  //   Platform.OS === 'ios' &&
+  //   !messaging().isDeviceRegisteredForRemoteMessages
+  // ) {
+  //   console.log('myMethod: ', 'registerDeviceForRemoteMessages');
+  //   await messaging().registerDeviceForRemoteMessages();
+  // }
+  const authorizationStatus = await messaging().requestPermission();
+  if (authorizationStatus === messaging.AuthorizationStatus.AUTHORIZED) {
+    messaging()
+      .hasPermission()
+      .then(async function () {
+        const token = await messaging().getToken();
+        updateToken(token);
+        messaging().subscribeToTopic('G1MB');
+      });
+  }
 
-  FCM.getFCMToken().then(token => {
-    console.log(token);
-    // TODO: Upload token to server
-    // store fcm token in your server
-    console.log('Token Uploading:', token);
-    updateToken(token);
-    FCM.subscribeToTopic('/topics/G1MB');
-  });
-
-  this.notificationListener = FCM.on(FCMEvent.Notification, async notif => {
+  messaging().onMessage(async notif => {
     // optional, do some component related stuff
     console.log('notificationListener: ', notif);
     this.newalarm = '1';
     this.message = '1';
-    this.title = null;
-    if (Platform.OS === 'ios') {
-      this.title = notif.aps.alert.title;
-    } else {
-      this.title = notif.fcm.title;
-    }
+    this.title = notif.notification.title;
 
     // 현재 접속한 채팅방을 열고 있을때는 알림을 울리지 않는다.
     const room_id = modelUtil.getValue('ADM010108.ROOM_ID') || 'X없음';
@@ -60,10 +61,10 @@ export const initPushNotification = () => {
           RNBeep.PlaySysSound(RNBeep.iOSSoundIDs.AudioToneBusy);
         }
         // ios에서 수신시 계속 시스템알림 발생 JKM 2019/12/26
-        notif.finish();
+        // notif.finish();
       } else {
         if (this.title !== undefined || this.title != null) {
-          Util.toastMsg(`${notif.fcm.title}\n${notif.fcm.body}`);
+          Util.toastMsg(`${this.title}\n${notif.notification.body}`);
         }
         if (ALRAM_YN === 'Y') {
           RNBeep.PlaySysSound(
@@ -123,52 +124,18 @@ export const initPushNotification = () => {
   // initial notification contains the notification that launchs the app. If user launchs app by clicking banner, the banner notification info will be here rather than through FCM.on event
   // sometimes Android kills activity when app goes to background, and when resume it broadcasts notification before JS is run. You can use FCM.getInitialNotification() to capture those missed events.
   // initial notification will be triggered all the time even when open app by icon so send some action identifier when you send notification
-  FCM.getInitialNotification().then(notif => {
-    console.log('getInitialNotification:', notif);
-  });
 };
 
 export const connectPushNotificationListeners = () => {
   // this shall be called regardless of app state: running, background or not running. Won't be called when app is killed by user in iOS
-  FCM.on(FCMEvent.Notification, async notif => {
-    // there are two parts of notif. notif.notification contains the notification payload, notif.data contains data payload
-    if (notif.local_notification) {
-      // this is a local notification
-      console.log(notif);
-    }
-    //
-    /**
-    notif.aps.alert
-    */
-    if (notif.opened_from_tray) {
-      // iOS: app is open/resumed because user clicked banner
-      // Android: app is open/resumed because user clicked banner or tapped app icon
-      console.log(notif);
-    }
-    // await someAsyncCall();
-    if (Platform.OS === 'ios') {
-      // optional
-      // iOS requires developers to call completionHandler to end notification process. If you do not call it your background remote notifications could be throttled, to read more about it see the above documentation link.
-      // This library handles it for you automatically with default behavior (for remote notification, finish with NoData; for WillPresent, finish depend on "show_in_foreground"). However if you want to return different result, follow the following code to override
-      // notif._notificationType is available for iOS platfrom
-      switch (notif._notificationType) {
-        case NotificationType.Remote:
-          notif.finish(RemoteNotificationResult.NewData); // other types available: RemoteNotificationResult.NewData, RemoteNotificationResult.ResultFailed
-          break;
-        case NotificationType.NotificationResponse:
-          notif.finish();
-          break;
-        case NotificationType.WillPresent:
-          notif.finish(WillPresentNotificationResult.All); // other types available: WillPresentNotificationResult.None
-          break;
-      }
-    }
-  });
-  FCM.on(FCMEvent.RefreshToken, token => {
-    console.log(`Token Refreshed: ${token}`);
-    // TODO: Upload token to server
-    // fcm token may not be available on first load, catch it here
-    updateToken(token);
+  messaging().setBackgroundMessageHandler(async remoteMessage => {
+    console.log('Message handled in the background!', remoteMessage);
+    //  여기에 로직을 작성한다.
+    //  remoteMessage.data로 메세지에 접근가능
+    //  remoteMessage.from 으로 topic name 또는 message identifier
+    //  remoteMessage.messageId 는 메시지 고유값 id
+    //  remoteMessage.notification 메시지와 함께 보내진 추가 데이터
+    //  remoteMessage.sentTime 보낸시간
   });
 };
 
@@ -184,11 +151,4 @@ const updateToken = async token => {
   await Cookie.clear().then(res => {
     Fetch.updatePushToken(token);
   });
-};
-
-const deleteToken = async () => {
-  await Cookie.clear().then(res => {
-    Fetch.updatePushToken(null);
-  });
-  FCM.unsubscribeFromTopic('/topics/G1MB');
 };

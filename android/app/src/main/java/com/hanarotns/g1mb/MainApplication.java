@@ -45,6 +45,7 @@ public class MainApplication extends NavigationApplication {
   @Override
   public void onCreate() {
     super.onCreate();
+    //  FirebaseApp.initializeApp(this);
     
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
   }

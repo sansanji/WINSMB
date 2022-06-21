@@ -1,7 +1,7 @@
 /* *
  * Import Common
  * */
-import { View, Image, StyleSheet, AsyncStorage, Text } from 'react-native';
+import {View, Image, StyleSheet, AsyncStorage, Text} from 'react-native';
 import {
   React,
   Redux,
@@ -17,7 +17,17 @@ import {
 /**
  * Import components
  */
-import { HBaseView, HListView, HRow, HTextfield, HFormView, HText, Touchable, HIcon, HFadeinView } from 'ux';
+import {
+  HBaseView,
+  HListView,
+  HRow,
+  HTextfield,
+  HFormView,
+  HText,
+  Touchable,
+  HIcon,
+  HFadeinView,
+} from 'ux';
 
 const tnsLogoImage = require('assets/images/feel-back14.png');
 /* *
@@ -49,7 +59,7 @@ class Component extends NavigationScreen {
   }
 
   componentWillMount() {
-    modelUtil.setModelData('ADM010106', { ROOM_NAME: null });
+    modelUtil.setModelData('ADM010106', {ROOM_NAME: null});
   }
 
   componentDidAppear() {
@@ -62,7 +72,7 @@ class Component extends NavigationScreen {
   }
 
   async fetch(newRoomData) {
-    const { navigator } = this.props;
+    const {navigator} = this.props;
     // Util.openLoader(this.screenId, true);
     const result = await Fetch.request('VTX010101SVC', 'getRooms', {
       body: JSON.stringify(modelUtil.getModelData('ADM010106')),
@@ -88,7 +98,8 @@ class Component extends NavigationScreen {
             ROOM_ID: newRoomData.ROOM_ID,
             ROOM_NAME: newRoomData.ROOM_NAME,
             USER_ID: newRoomData.USER_ID,
-            afterCreateRoom: (ROOM_ID, ROOM_NAME) => this.afterCreateRoom(ROOM_ID, ROOM_NAME),
+            afterCreateRoom: (ROOM_ID, ROOM_NAME) =>
+              this.afterCreateRoom(ROOM_ID, ROOM_NAME),
           },
           newRoomData.ROOM_NAME,
         );
@@ -102,8 +113,8 @@ class Component extends NavigationScreen {
   }
 
   onPopup(item, index) {
-    const { navigator } = this.props;
-    const { session } = this.props.global;
+    const {navigator} = this.props;
+    const {session} = this.props.global;
     Navigation(
       navigator,
       'screen.ADM010108',
@@ -112,20 +123,24 @@ class Component extends NavigationScreen {
         USER_ID: session.USER_ID,
         ROOM_NAME: item.ROOM_NAME,
         RECENT_CHAT_DATE: item.RECENT_CHAT_DATE,
-        afterCreateRoom: (ROOM_ID, ROOM_NAME) => this.afterCreateRoom(ROOM_ID, ROOM_NAME),
+        afterCreateRoom: (ROOM_ID, ROOM_NAME) =>
+          this.afterCreateRoom(ROOM_ID, ROOM_NAME),
       },
       item.ROOM_NAME,
     );
     // 방을 읽음 표시
-    // this.fetchReadRoom(item, index);
+    this.fetchReadRoom(item, index);
   }
 
   onPopupCR() {
-    const { navigator } = this.props;
+    const {navigator} = this.props;
     Navigation(
       navigator,
       'screen.ADM010107',
-      { afterCreateRoom: (ROOM_ID, ROOM_NAME) => this.afterCreateRoom(ROOM_ID, ROOM_NAME) },
+      {
+        afterCreateRoom: (ROOM_ID, ROOM_NAME) =>
+          this.afterCreateRoom(ROOM_ID, ROOM_NAME),
+      },
       '방만들기',
     );
   }
@@ -133,20 +148,20 @@ class Component extends NavigationScreen {
   // 신규 멤버 초대시 NEW_MEMBER에 값을 넘겨준다.
   afterCreateRoom(ROOM_ID, ROOM_NAME) {
     console.log('JAY', ROOM_ID, ROOM_NAME);
-    const { session } = this.props.global;
-    const newRoomData = { ROOM_ID, USER_ID: session.USER_ID, ROOM_NAME };
+    const {session} = this.props.global;
+    const newRoomData = {ROOM_ID, USER_ID: session.USER_ID, ROOM_NAME};
     this.fetch(newRoomData);
   }
 
   // 방을 읽음 표시
   async fetchReadRoom(item, index) {
     const result = await Fetch.request('VTX010101SVC', 'readRoom', {
-      body: JSON.stringify({ ROOM_ID: item.ROOM_ID }),
+      body: JSON.stringify({ROOM_ID: item.ROOM_ID}),
     });
     if (result) {
       const dataList = this.state.data;
       dataList[index].READ_YN = 'Y';
-      this.setState({ data: dataList });
+      this.setState({data: dataList});
     }
   }
 
@@ -174,7 +189,7 @@ class Component extends NavigationScreen {
         <Image
           source={tnsLogoImage}
           resizeMode={'contain'}
-          style={{ margin: 0, height: 150 }}
+          style={{margin: 0, height: 150}}
         />
         {/* <Text style={styles.mainText}>Welcome to Wins Mobile! V1.0</Text> */}
       </HFadeinView>
@@ -182,15 +197,24 @@ class Component extends NavigationScreen {
   );
 
   renderBody = (item, index) => (
-    <Touchable style={{ flex: 1 }} key={item.ROOM_ID} onPress={() => this.onPopup(item, index)}>
-      <HFormView style={{ padding: 10, marginTop: 2 }}>
+    <Touchable
+      style={{flex: 1}}
+      key={item.ROOM_ID}
+      onPress={() => this.onPopup(item, index)}>
+      <HFormView style={{padding: 10, marginTop: 2}}>
         <HRow between>
           <View
             style={{
               flexDirection: 'row',
-            }}
-          >
-            <HText value={item.ROOM_NAME.substring(0, 25)} textStyle={item.ROOM_NAME === 'G1 My Cloud' ? { fontWeight: 'bold', color: bluecolor.basicBluebt } : null} />
+            }}>
+            <HText
+              value={item.ROOM_NAME.substring(0, 25)}
+              textStyle={
+                item.ROOM_NAME === 'G1 My Cloud'
+                  ? {fontWeight: 'bold', color: bluecolor.basicBluebt}
+                  : null
+              }
+            />
             <HText
               value={`${item.USER_COUNT}`}
               textStyle={{
@@ -203,18 +227,31 @@ class Component extends NavigationScreen {
             />
           </View>
           {item.READ_YN === 'N' ? (
-            <HIcon name={'report'} iconType="M" color={bluecolor.basicRedColor} size={20} />
+            <HIcon
+              name={'report'}
+              iconType="M"
+              color={bluecolor.basicRedColor}
+              size={20}
+            />
           ) : null}
         </HRow>
-        <View style={{ flex: 1, marginTop: 5 }}>
+        <View style={{flex: 1, marginTop: 5}}>
           <HRow between>
             <HText
               value={item.MSG_CONTENTS}
-              textStyle={{ fontSize: 10, fontWeight: null, color: bluecolor.basicDeepGrayColor }}
+              textStyle={{
+                fontSize: 10,
+                fontWeight: null,
+                color: bluecolor.basicDeepGrayColor,
+              }}
             />
             <HText
               value={item.ADD_DATE}
-              textStyle={{ fontSize: 10, fontWeight: null, color: bluecolor.basicDeepGrayColor }}
+              textStyle={{
+                fontSize: 10,
+                fontWeight: null,
+                color: bluecolor.basicDeepGrayColor,
+              }}
             />
           </HRow>
         </View>
@@ -240,14 +277,16 @@ class Component extends NavigationScreen {
       },
     ];
     return (
-      <HBaseView scrollable={false} buttonGroup={this.props.noMain ? buttonGroup : null}>
+      <HBaseView
+        scrollable={false}
+        buttonGroup={this.props.noMain ? buttonGroup : null}>
         {this.props.noMain ? null : this.mainHeader()}
         <HListView
           keyExtractor={item => item.ROOM_ID}
           headerClose={false}
           // renderHeader={this.renderHeader}
           renderHeader={this.props.noMain ? this.renderHeader : null}
-          renderItem={({ item, index }) => this.renderBody(item, index)}
+          renderItem={({item, index}) => this.renderBody(item, index)}
           onSearch={() => this.fetch()}
           onMoreView={this.onMoreView}
           // 그려진값
@@ -269,8 +308,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: bluecolor.basicSkyBlueColor,
     marginTop: -10,
-    marginLeft : -10,
-    marginRight : -10,
+    marginLeft: -10,
+    marginRight: -10,
   },
   mainText: {
     textAlign: 'center',
@@ -287,7 +326,7 @@ const styles = StyleSheet.create({
 /**
  * Inject redux actions and props
  */
-const mapStateToProps = state => ({ global: state.global, chat: state.chat });
+const mapStateToProps = state => ({global: state.global, chat: state.chat});
 
 /**
  * Wrapping with root component

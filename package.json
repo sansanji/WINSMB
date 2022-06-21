@@ -30,6 +30,8 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.17.4",
     "@react-native-community/viewpager": "^5.0.11",
+    "@react-native-firebase/app": "^14.11.0",
+    "@react-native-firebase/messaging": "^14.11.0",
     "create-react-class": "^15.7.0",
     "deprecated-react-native-listview": "0.0.7",
     "docdash": "^1.2.0",

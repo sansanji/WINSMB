@@ -4,17 +4,6 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Ionicons.ttf</string>
-		<string>AntDesign.ttf</string>
-		<string>FontAwesome.ttf</string>
-		<string>FontAwesome5_Brands.ttf</string>
-		<string>FontAwesome5_Regular.ttf</string>
-		<string>MaterialCommunityIcons.ttf</string>
-		<string>MaterialIcons.ttf</string>
-		<string>FontAwesome5_Solid.ttf</string>
-	</array>
 	<key>CFBundleDisplayName</key>
 	<string>WINSMB</string>
 	<key>CFBundleExecutable</key>
@@ -62,6 +51,22 @@
 	<string>$(PRODUCT_NAME) would like access to your photo gallery?  Your photo gallery is used to share shipment photo.  당신의 사진갤러리는 화물사진 공유에 쓰일 것 입니다.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>$(PRODUCT_NAME) would like access to your speech recognition?  Your speech recognition is used to listen your speech for ordering AI chatbot.  당신의 음성인식은 챗봇이 당신의 명령을 듣기위해 쓰일 것 입니다.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Ionicons.ttf</string>
+		<string>AntDesign.ttf</string>
+		<string>FontAwesome.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
+		<string>MaterialIcons.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
